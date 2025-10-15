@@ -74,8 +74,7 @@ const CostSheetApp = () => {
   const fetchTimeReport = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${BACKEND_URL}/reports/${selectedTimeSub}/${userId}`
+      const response = await fetch(`${BACKEND_URL}/reports/${selectedTimeSub}/${userId}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -326,8 +325,10 @@ const CostSheetApp = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <BackArrow />
+         <View style={styles.headerRow}>
+        <BackArrow style={styles.backArrow}/>
         <Text style={styles.headerTitle}>💡 Cost Reports</Text>
+        </View>
         <Text style={styles.headerSubtitle}>Track your energy expenses</Text>
       </View>
 
@@ -393,6 +394,16 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     alignItems: 'center',
   },
+    headerRow: {
+    flexDirection: 'row', // 👈 makes BackArrow + Title in one line
+    alignItems: 'center', // vertically align them in middle
+    gap: 8, // spacing between arrow and text (React Native 0.71+)
+  },
+ backArrow: {
+  position: 'absolute',
+  right : 230,
+  top: 16,
+},
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',

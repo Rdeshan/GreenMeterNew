@@ -135,6 +135,7 @@ export default function HomeScreen() {
     return "🔌";
   };
 
+  const AllDevices = devices;
   const totalActiveDevices = devices.filter(device => device.state === "ON").length;
   const totalPowerConsumption = devices
     .filter(device => device.state === "ON")
@@ -202,7 +203,7 @@ export default function HomeScreen() {
       <View style={styles.overviewCard}>
         <View style={styles.overviewRow}>
           <View style={styles.overviewItem}>
-            <Text style={styles.overviewNumber}>{}</Text>
+            <Text style={styles.overviewNumber}>{devices.length}</Text>
             <Text style={styles.overviewLabel}>All devices</Text>
           </View>
           <View style={styles.overviewDivider} />

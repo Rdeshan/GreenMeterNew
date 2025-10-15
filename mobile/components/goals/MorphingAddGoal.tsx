@@ -286,6 +286,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     elevation: 8,
     zIndex: 1000,
+    marginTop:60
+    
   },
   fabButton: {
     flex: 1,
