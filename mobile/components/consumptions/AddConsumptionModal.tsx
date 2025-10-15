@@ -1,9 +1,7 @@
 // components/AddConsumptionModal.tsx
 import React, { useEffect, useState } from 'react';
-import { Platform, StyleSheet, TextInput, Modal, Alert, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Platform, StyleSheet, TextInput,View,Text, Modal, Alert, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import DeviceInfoDisplay from './DeviceInfoDisplay';
 
 interface Device {
@@ -121,17 +119,17 @@ export default function AddConsumptionModal({ visible, devices, editingRecord, o
             presentationStyle="pageSheet"
         >
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-              <ThemedView style={styles.modalContainer}>
-                        <ThemedView style={styles.modalHeader}>
-                    <ThemedText type="title" style={styles.modalTitle}>
+              <View style={styles.modalContainer}>
+                        <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>
                         {isEditMode ? 'Edit Energy Record' : 'Add Energy Record'}
-                    </ThemedText>
-                </ThemedView>
+                    </Text>
+                </View>
 
-                <ThemedView style={styles.formContainer}>
+                <View style={styles.formContainer}>
                     {/* Device Picker */}
-                    <ThemedText style={styles.inputLabel}>Device</ThemedText>
-                    <ThemedView style={styles.pickerContainer}>
+                    <Text style={styles.inputLabel}>Device</Text>
+                    <View style={styles.pickerContainer}>
                         <Picker
                             selectedValue={selectedDeviceId}
                             onValueChange={(itemValue) => setSelectedDeviceId(itemValue)}
@@ -145,12 +143,12 @@ export default function AddConsumptionModal({ visible, devices, editingRecord, o
                                 />
                             ))}
                         </Picker>
-                    </ThemedView>
+                    </View>
 
                     {/* Active Time */}
-                    <ThemedText style={styles.inputLabel}>Active Time</ThemedText>
-                    <ThemedView style={styles.timeContainer}>
-                        <ThemedView style={styles.timeInputContainer}>
+                    <Text style={styles.inputLabel}>Active Time</Text>
+                    <View style={styles.timeContainer}>
+                        <View style={styles.timeInputContainer}>
                                 <TextInput
                                     style={styles.timeInput}
                                     placeholder="0"
@@ -162,9 +160,9 @@ export default function AddConsumptionModal({ visible, devices, editingRecord, o
                                     blurOnSubmit={true}
                                     onSubmitEditing={() => Keyboard.dismiss()}
                                 />
-                                <ThemedText style={styles.timeLabel}>hrs</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.timeInputContainer}>
+                                <Text style={styles.timeLabel}>hrs</Text>
+                            </View>
+                            <View style={styles.timeInputContainer}>
                                 <TextInput
                                     style={styles.timeInput}
                                     placeholder="0"
@@ -176,9 +174,9 @@ export default function AddConsumptionModal({ visible, devices, editingRecord, o
                                     blurOnSubmit={true}
                                     onSubmitEditing={() => Keyboard.dismiss()}
                                 />
-                                <ThemedText style={styles.timeLabel}>min</ThemedText>
-                            </ThemedView>
-                    </ThemedView>
+                                <Text style={styles.timeLabel}>min</Text>
+                            </View>
+                    </View>
 
                     {/* Device Info Display */}
                     {selectedDevice && (
@@ -189,24 +187,24 @@ export default function AddConsumptionModal({ visible, devices, editingRecord, o
                         />
                     )}
 
-                    <ThemedView style={styles.buttonContainer}>
+                    <View style={styles.buttonContainer}>
                         <TouchableOpacity
                             style={[styles.modalButton, styles.cancelButton]}
                             onPress={handleCancel}
                         >
-                            <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
+                            <Text style={styles.cancelButtonText}>Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.modalButton, styles.saveButton]}
                             onPress={handleSave}
                         >
-                            <ThemedText style={styles.saveButtonText}>
+                            <Text style={styles.saveButtonText}>
                                 {isEditMode ? 'Update Record' : 'Add Record'}
-                            </ThemedText>
+                            </Text>
                         </TouchableOpacity>
-                    </ThemedView>
-                </ThemedView>
-            </ThemedView>
+                    </View>
+                </View>
+            </View>
     </TouchableWithoutFeedback>
         </Modal>
     );

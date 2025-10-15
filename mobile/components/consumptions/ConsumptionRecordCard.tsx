@@ -1,8 +1,6 @@
 // components/ConsumptionRecordCard.tsx
 import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet, TouchableOpacity,View,Text } from 'react-native';
 import { router } from 'expo-router';
 
 interface ConsumptionRecord {
@@ -44,52 +42,52 @@ export default function ConsumptionRecordCard({ record, device, onEdit, onDelete
 
     return (
         <TouchableOpacity onPress={() => router.push(`/consumption-detail/${record.id}` as any)}>
-        <ThemedView style={styles.recordCard}>
-            <ThemedView style={styles.recordHeader}>
-                <ThemedView style={styles.deviceIcon}>
-                    <ThemedText style={styles.deviceIconText}>
+        <View style={styles.recordCard}>
+            <View style={styles.recordHeader}>
+                <View style={styles.deviceIcon}>
+                    <Text style={styles.deviceIconText}>
                         {getDeviceIcon(record.device_name)}
-                    </ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.recordInfo}>
-                    <ThemedText style={styles.categoryText}>
+                    </Text>
+                </View>
+                <View style={styles.recordInfo}>
+                    <Text style={styles.categoryText}>
                         Category: Electricity
-                    </ThemedText>
-                    <ThemedText type="defaultSemiBold" style={styles.device_name}>
+                    </Text>
+                    <Text style={styles.device_name}>
                         Device name: {record.device_name}
-                    </ThemedText>
-                    <ThemedText style={styles.recordDetails}>
+                    </Text>
+                    <Text style={styles.recordDetails}>
                         Active for: {record.hours}h {record.minutes}m
-                    </ThemedText>
-                    <ThemedText style={styles.recordDetails}>
+                    </Text>
+                    <Text style={styles.recordDetails}>
                         Power usage: {device?.powerUsage}W
-                    </ThemedText>
-                    <ThemedText style={styles.recordDetails}>
+                    </Text>
+                    <Text style={styles.recordDetails}>
                         Energy consumed: {record.energyConsumed.toFixed(3)} kWh
-                    </ThemedText>
-                    <ThemedText style={styles.statusText}>
+                    </Text>
+                    <Text style={styles.statusText}>
                         Units burned {(record.energyConsumed/1000).toFixed(2)}
-                    </ThemedText>
-                    <ThemedText style={styles.statusText}>
+                    </Text>
+                    <Text style={styles.statusText}>
                         Created At {record.timestamp.toLocaleString()}
-                    </ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.recordActions}>
+                    </Text>
+                </View>
+                <View style={styles.recordActions}>
                     <TouchableOpacity
                         style={styles.actionButton}
                         onPress={() => onEdit?.(record)}
                     >
-                        <ThemedText style={styles.actionButtonText}>✏️</ThemedText>
+                        <Text style={styles.actionButtonText}>✏️</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.actionButton}
                         onPress={() => onDelete?.(record.id)}
                     >
-                        <ThemedText style={styles.actionButtonText}>🗑️</ThemedText>
+                        <Text style={styles.actionButtonText}>🗑️</Text>
                     </TouchableOpacity>
-                </ThemedView>
-            </ThemedView>
-        </ThemedView>
+                </View>
+            </View>
+        </View>
         </TouchableOpacity>
     );
 }

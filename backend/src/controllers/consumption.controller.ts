@@ -1,12 +1,12 @@
 import { Request, Response } from 'express'
-import Consumption from '../models/consumption.model'
+import Consumption from '../models/consumption.model.js'
 import Device, { IDevice } from '../models/Device'
-import AiGenerate from '../config/gemini.config'
+import AiGenerate from '../config/gemini.config.js'
 
 // Create consumption record
 export const addConsumptionController = async (req: any, res: Response) => {
   try {
-    const userId = req.body.userId
+    const userId = req.userId
 
     const { deviceId, hours, minutes } = req.body
 
@@ -61,19 +61,17 @@ export const addConsumptionController = async (req: any, res: Response) => {
 // Get all consumptions
 export const getAllConsumptionsController = async (req: any, res: Response) => {
   try {
-    // userId should be set by auth middleware from token
-    const userId = req.user?._id;
-    if (!userId) {
-      return res.status(401).json({ success: false, message: 'Unauthorized: No user ID found' });
-    }
-    const consumptions = await Consumption.find({ user: userId })
-      .select('-recommendations -summary')
+    console.log("+++++++++",req.userId)
+    const consumptions = await Consumption.find({ user: req.userId })
+      .select('-user -recommendations -summary')
       .populate('device')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+    console.log(consumptions)
 
-    res.json({ success: true, data: consumptions });
+    res.json({ success: true, data: consumptions })
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    console.log(error)
+    res.status(500).json({ success: false, message: error.message })
   }
 }
 
@@ -84,7 +82,9 @@ export const getConsumptionByIdController = async (
 ) => {
   try {
     const { id } = req.params
-    const consumption = await Consumption.findById(id).populate('device')
+    const consumption = await Consumption.findById(id)
+      .select('-user')
+      .populate('device')
 
     if (!consumption) {
       return res
@@ -128,7 +128,7 @@ export const editConsumptionController = async (
     const recommendations = responseFromAI?.recommendations || null
     const summary = responseFromAI?.summary || ''
 
-    const updateData: any = {
+    const updateData : any= {
       hours,
       minutes,
       device: deviceId

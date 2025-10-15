@@ -32,7 +32,7 @@ const Profile = () => {
     <ScrollView style={{ flex: 1, backgroundColor: '#F9FAFB', padding: 16 }}>
       <View style={{ alignItems: 'center', marginTop: 30 }}>
         <Image
-          source={{ uri: user?.avatar || 'https://i.pravatar.cc/150?img=12' }}
+          
           style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 12 }}
         />
         <Text style={{ fontSize: 22, fontWeight: 'bold' }}>{user?.name || 'No Name'}</Text>

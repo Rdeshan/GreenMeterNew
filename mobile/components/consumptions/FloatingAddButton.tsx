@@ -1,7 +1,7 @@
 // components/FloatingAddButton.tsx
 import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+import { StyleSheet, TouchableOpacity,Text } from 'react-native';
+
 
 interface FloatingAddButtonProps {
     onPress: () => void;
@@ -13,7 +13,7 @@ export default function FloatingAddButton({ onPress }: FloatingAddButtonProps) {
             style={styles.floatingButton}
             onPress={onPress}
         >
-            <ThemedText style={styles.floatingButtonText}>+</ThemedText>
+            <Text style={styles.floatingButtonText}>+</Text>
         </TouchableOpacity>
     );
 }

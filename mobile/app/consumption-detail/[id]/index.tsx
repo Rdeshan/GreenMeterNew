@@ -4,13 +4,11 @@ import {
   ScrollView,
   ActivityIndicator,
   View,
-  Alert
+  Alert,
+  Text
 } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
-import { ThemedText } from '@/components/ThemedText'
-import { ThemedView } from '@/components/ThemedView'
 import axios from 'axios'
-import { Platform } from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
@@ -77,16 +75,16 @@ export default function ConsumptionDetailScreen () {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size='large' color='#6366F1' />
-        <ThemedText style={styles.loadingText}>Loading details...</ThemedText>
+        <Text style={styles.loadingText}>Loading details...</Text>
       </View>
     )
   }
 
   if (!consumption) {
     return (
-      <ThemedView style={styles.errorContainer}>
-        <ThemedText style={styles.errorText}>No details found.</ThemedText>
-      </ThemedView>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>No details found.</Text>
+      </View>
     )
   }
 
@@ -103,105 +101,105 @@ export default function ConsumptionDetailScreen () {
         >
           <Ionicons name='chevron-back' size={24} color='#1E293B' />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Consumption Details</ThemedText>
+        <Text style={styles.headerTitle}>Consumption Details</Text>
       </View>
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
         {/* Device Info */}
-        <ThemedView style={styles.card}>
-          <ThemedText type='subtitle' style={styles.sectionTitle}>
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>
             Device Information
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
+          </Text>
+          <Text style={styles.infoText}>
             Device name: {consumption.device.device_name}
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
+          </Text>
+          <Text style={styles.infoText}>
             Location: {consumption.device.location}
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
+          </Text>
+          <Text style={styles.infoText}>
             Type: {consumption.device.type}
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
+          </Text>
+          <Text style={styles.infoText}>
             Power Usage: {consumption.device.consumption} W
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
+          </Text>
+          <Text style={styles.infoText}>
             State: {consumption.device.state}
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
         {/* Usage Info */}
-        <ThemedView style={styles.card}>
-          <ThemedText type='subtitle' style={styles.sectionTitle}>
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>
             Usage Details
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
+          </Text>
+          <Text style={styles.infoText}>
             Active for: {consumption.hours}h {consumption.minutes}m
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
+          </Text>
+          <Text style={styles.infoText}>
             Energy Consumed: {energyConsumed.toFixed(2)} Wh
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
+          </Text>
+          <Text style={styles.infoText}>
             Units Burned: {(energyConsumed / 1000).toFixed(2)}
-          </ThemedText>
-          <ThemedText style={styles.timestamp}>
+          </Text>
+          <Text style={styles.timestamp}>
             Created at: {new Date(consumption.createdAt).toLocaleString()}
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
         {/* Recommendations */}
-        <ThemedView style={styles.card}>
-          <ThemedText type='subtitle' style={styles.sectionTitle}>
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>
             Recommendations
-          </ThemedText>
+          </Text>
 
           {consumption.recommendations.tips.length > 0 && (
             <>
-              <ThemedText style={styles.subSection}>💡 Tips:</ThemedText>
+              <Text style={styles.subSection}>💡 Tips:</Text>
               {consumption.recommendations.tips.map((tip, i) => (
-                <ThemedText key={i} style={styles.listItem}>
+                <Text key={i} style={styles.listItem}>
                   • {tip}
-                </ThemedText>
+                </Text>
               ))}
             </>
           )}
 
           {consumption.recommendations.improvements.length > 0 && (
             <>
-              <ThemedText style={styles.subSection}>
+              <Text style={styles.subSection}>
                 ⚡ Improvements:
-              </ThemedText>
+              </Text>
               {consumption.recommendations.improvements.map((imp, i) => (
-                <ThemedText key={i} style={styles.listItem}>
+                <Text key={i} style={styles.listItem}>
                   • {imp}
-                </ThemedText>
+                </Text>
               ))}
             </>
           )}
 
           {consumption.recommendations.warnings.length > 0 && (
             <>
-              <ThemedText style={styles.subSection}>🚨 Warnings:</ThemedText>
+              <Text style={styles.subSection}>🚨 Warnings:</Text>
               {consumption.recommendations.warnings.map((warn, i) => (
-                <ThemedText
+                <Text
                   key={i}
                   style={[styles.listItem, { color: '#DC2626' }]}
                 >
                   • {warn}
-                </ThemedText>
+                </Text>
               ))}
             </>
           )}
-        </ThemedView>
+        </View>
 
         {/* Summary */}
-        <ThemedView style={styles.card}>
-          <ThemedText type='subtitle' style={styles.sectionTitle}>
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>
             Summary
-          </ThemedText>
-          <ThemedText style={styles.infoText}>{consumption.summary}</ThemedText>
-        </ThemedView>
+          </Text>
+          <Text style={styles.infoText}>{consumption.summary}</Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   )

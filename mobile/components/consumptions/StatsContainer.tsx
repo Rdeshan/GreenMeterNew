@@ -1,8 +1,8 @@
 // components/StatsContainer.tsx
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet,Text,View } from 'react-native';
+
+
 
 interface ConsumptionRecord {
     id: string;
@@ -41,44 +41,44 @@ export default function StatsContainer({ consumptionRecords, devices }: StatsCon
     return (
         <>
             {/* Header Stats */}
-            <ThemedView style={styles.statsContainer}>
-                <ThemedView style={styles.statCard}>
-                    <ThemedText type="defaultSemiBold" style={styles.statNumber}>
+            <View style={styles.statsContainer}>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>
                         {calculateTotalConsumption()} Wh
-                    </ThemedText>
-                    <ThemedText style={styles.statLabel}>Total Consumption</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.statCard}>
-                    <ThemedText type="defaultSemiBold" style={styles.statNumber}>
+                    </Text>
+                    <Text style={styles.statLabel}>Total Consumption</Text>
+                </View>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>
                         LKR {calculateCost()}
-                    </ThemedText>
-                    <ThemedText style={styles.statLabel}>Est. Cost</ThemedText>
-                </ThemedView>
-            </ThemedView>
+                    </Text>
+                    <Text style={styles.statLabel}>Est. Cost</Text>
+                </View>
+            </View>
 
             {/* Title */}
-            <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">Energy Records</ThemedText>
-                <ThemedText style={styles.subtitle}>
+            <View style={styles.titleContainer}>
+                <Text >Energy Records</Text>
+                <Text style={styles.subtitle}>
                     Track your device usage and consumption
-                </ThemedText>
-            </ThemedView>
+                </Text>
+            </View>
 
             {/* Bottom Stats */}
-            <ThemedView style={styles.bottomStats}>
-                <ThemedView style={styles.bottomStatCard}>
-                    <ThemedText type="defaultSemiBold" style={styles.bottomStatNumber}>
+            <View style={styles.bottomStats}>
+                <View style={styles.bottomStatCard}>
+                    <Text style={styles.bottomStatNumber}>
                         {consumptionRecords.length}
-                    </ThemedText>
-                    <ThemedText style={styles.bottomStatLabel}>Total Records</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.bottomStatCard}>
-                    <ThemedText type="defaultSemiBold" style={styles.bottomStatNumber}>
+                    </Text>
+                    <Text style={styles.bottomStatLabel}>Total Records</Text>
+                </View>
+                <View style={styles.bottomStatCard}>
+                    <Text style={styles.bottomStatNumber}>
                         {devices.length}
-                    </ThemedText>
-                    <ThemedText style={styles.bottomStatLabel}>Available Devices</ThemedText>
-                </ThemedView>
-            </ThemedView>
+                    </Text>
+                    <Text style={styles.bottomStatLabel}>Available Devices</Text>
+                </View>
+            </View>
         </>
     );
 }

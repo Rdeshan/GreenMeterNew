@@ -1,8 +1,7 @@
 // components/DeviceInfoDisplay.tsx
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet,View,Text } from 'react-native';
+
 
 interface Device {
     id: string;
@@ -22,20 +21,20 @@ export default function DeviceInfoDisplay({ device, hours, minutes }: DeviceInfo
     const estimatedConsumption = (device.powerUsage * totalHours) / 1000;
 
     return (
-        <ThemedView style={styles.deviceInfoContainer}>
-            <ThemedText style={styles.deviceInfoTitle}>Device Info:</ThemedText>
-            <ThemedText style={styles.deviceInfoText}>
+        <View style={styles.deviceInfoContainer}>
+            <Text style={styles.deviceInfoTitle}>Device Info:</Text>
+            <Text style={styles.deviceInfoText}>
                 Power: {device.powerUsage}W
-            </ThemedText>
-            <ThemedText style={styles.deviceInfoText}>
+            </Text>
+            <Text style={styles.deviceInfoText}>
                 Location: {device.location}
-            </ThemedText>
+            </Text>
             {totalHours > 0 && (
-                <ThemedText style={styles.deviceInfoText}>
+                <Text style={styles.deviceInfoText}>
                     Estimated consumption: {estimatedConsumption.toFixed(3)} kWh
-                </ThemedText>
+                </Text>
             )}
-        </ThemedView>
+        </View>
     );
 }
 

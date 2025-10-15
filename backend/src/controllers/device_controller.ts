@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Device from '../models/Device';
 import mongoose from 'mongoose';
+import Consumption from '../models/consumption.model';
 
 export const saveDevice = async (req: Request, res: Response) => {
   try {
@@ -85,6 +86,9 @@ export const deleteDevice = async (req: Request, res: Response) => {
     // Use findOneAndDelete to be explicit
     const deletedDevice = await Device.findOneAndDelete({ _id: deviceId, userId }).lean();
     console.log("Deleted device result:", deletedDevice);
+
+     await Consumption.deleteMany({ device: deviceId })
+    console.log("Deleted related consupmtions:");
 
     if (!deletedDevice) {
       console.log("Device not found for deletion");

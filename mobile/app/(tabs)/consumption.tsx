@@ -9,8 +9,7 @@ import {
   Text
 } from 'react-native'
 import { Platform } from 'react-native'
-import { ThemedText } from '@/components/ThemedText'
-import { ThemedView } from '@/components/ThemedView'
+
 import StatsContainer from '@/components/consumptions/StatsContainer'
 import ConsumptionRecordsList from '@/components/consumptions/ConsumptionRecordsList'
 import AddConsumptionModal from '@/components/consumptions/AddConsumptionModal'
@@ -97,7 +96,7 @@ export default function Consumptions () {
       console.log('Fetch devices error', err)
       Alert.alert(
         'Error',
-        `Could not fetch devices. Check backend/CORS/IP. ${API_BASE}/get-all-devices`
+        `${err} ,Could not fetch devices ${API_BASE}/get-all-devices`
       )
     } finally {
       setLoading(false)
@@ -336,9 +335,9 @@ export default function Consumptions () {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size='large' color='#6366F1' />
-        <ThemedText style={styles.loadingText}>
+        <Text style={styles.loadingText}>
           Loading energy data...
-        </ThemedText>
+        </Text>
       </View>
     )
   }
@@ -384,11 +383,11 @@ export default function Consumptions () {
             }}
           />
         ) : (
-          <ThemedView style={styles.emptyState}>
-            <ThemedText style={styles.emptyStateText}>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>
               No energy records yet. Tap the + button to add your first record!
-            </ThemedText>
-          </ThemedView>
+            </Text>
+          </View>
         )}
       </ScrollView>
 
