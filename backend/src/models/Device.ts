@@ -1,6 +1,7 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document,Types } from 'mongoose';
 
 export interface IDevice extends Document {
+   userId?: Types.ObjectId | string;
   device_name: string;
   type?: string;
   location?: string;
@@ -10,6 +11,7 @@ export interface IDevice extends Document {
 }
 
 const DeviceSchema = new Schema<IDevice>({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
   device_name: { type: String, required: true },
   type: { type: String },
   location: { type: String },

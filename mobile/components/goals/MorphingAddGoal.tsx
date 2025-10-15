@@ -19,7 +19,7 @@ import { Goal } from './types/goal';
 import { DeviceItem } from "@/components/device_management/display_home/type/DeviceItem";
 import axios from 'axios';
 import { API_BASE } from '../../constants/index'
-
+import { useAuthStore } from '../../store/authStore';
 const { width, height } = Dimensions.get('window');
 
 type MorphingAddGoalProps = {
@@ -33,7 +33,6 @@ export default function MorphingAddGoal({ onAddGoal }: MorphingAddGoalProps) {
 
   const [devices, setDevices] = useState<DeviceItem[]>([]);
   const [loadingDevices, setLoadingDevices] = useState(true);
-
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [priority, setPriority] = useState<'Low' | 'Medium' | 'High'>('Medium');
@@ -44,32 +43,41 @@ export default function MorphingAddGoal({ onAddGoal }: MorphingAddGoalProps) {
   const [goalTime, setGoalTime] = useState<Date>(new Date()); // new
   const [showTimePicker, setShowTimePicker] = useState(false); // new
 
-  useEffect(() => {
-    const fetchDevices = async () => {
-      setLoadingDevices(true);
-      try {
-        const res = await axios.get(`${API_BASE}/get-all-devices`);
-        const list: DeviceItem[] = res.data?.devices || [];
-        setDevices(list);
-      } catch (err) {
-        console.log('Fetch devices error', err);
-        Alert.alert('Error', 'Could not fetch devices. Check backend/CORS/IP.');
-      } finally {
-        setLoadingDevices(false);
-      }
-    };
+  const auth = useAuthStore();
 
-    fetchDevices();
-  }, []);
+const fetchDevices = async () => {
+  setLoadingDevices(true);
+  try {
+    const res = await axios.get(`${API_BASE}/get-all-devices`, {
+      headers: auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : undefined,
+    });
+    const list: DeviceItem[] = res.data?.devices || [];
+    setDevices(list);
+  } catch (err) {
+    console.log('Fetch devices error', err);
+    Alert.alert('Error', 'Could not fetch devices. Check backend/CORS/IP.');
+  } finally {
+    setLoadingDevices(false);
+  }
+};
 
   // Animation interpolations
   const toggle = () => {
-    Animated.timing(animation, {
-      toValue: open ? 0 : 1,
-      duration: 400,
-      useNativeDriver: false,
-    }).start(() => setOpen(!open));
-  };
+  Animated.timing(animation, {
+    toValue: open ? 0 : 1,
+    duration: 400,
+    useNativeDriver: false,
+  }).start(() => {
+    const newState = !open;
+    setOpen(newState);
+    if (newState) fetchDevices(); // 👈 Fetch devices again when opening the goal form
+  });
+};
+
+useEffect(() => {
+  fetchDevices(); // initial load
+}, []);
+
 
   //handle time
   const handleTimeChange = (event: any, selected?: Date) => {

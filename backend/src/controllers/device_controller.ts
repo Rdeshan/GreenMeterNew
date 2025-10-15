@@ -4,7 +4,15 @@ import mongoose from 'mongoose';
 
 export const saveDevice = async (req: Request, res: Response) => {
   try {
-    const device = new Device(req.body);
+    const userId = (req as any).userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const device = new Device({
+      ...req.body,
+      userId,
+    });
     await device.save();
     res.status(201).json(device);
   } catch (error) {
@@ -13,7 +21,11 @@ export const saveDevice = async (req: Request, res: Response) => {
 };
 export const getAllDevices = async (req:Request,res:Response) =>{
     try{
-        const devices =  await Device.find();
+        const userId = (req as any).userId;
+        if (!userId) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        const devices =  await Device.find({ userId });
         res.status(200).json({devices});
     }catch(err){
         console.error(err);
@@ -23,14 +35,17 @@ export const getAllDevices = async (req:Request,res:Response) =>{
 export const getOneDevice = async (req: Request, res: Response) => {
   try {
     let { deviceId } = req.params;
-  
+    const userId = (req as any).userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
     if (!mongoose.Types.ObjectId.isValid(deviceId)) {
       console.log("Invalid device ID");
       return res.status(400).json({ error: "Invalid device ID" });
     }
 
-    const oneDevice = await Device.findById(deviceId);
+    const oneDevice = await Device.findOne({ _id: deviceId, userId });
     console.log("oneDevice from DB:", oneDevice);
 
     if (!oneDevice) {
@@ -50,6 +65,10 @@ export const deleteDevice = async (req: Request, res: Response) => {
   try {
     const rawId = req.params.deviceId;
     console.log("Received deviceId raw:", JSON.stringify(rawId));
+    const userId = (req as any).userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
     if (!rawId) {
       return res.status(400).json({ error: "deviceId param is required" });
@@ -64,7 +83,7 @@ export const deleteDevice = async (req: Request, res: Response) => {
     }
 
     // Use findOneAndDelete to be explicit
-    const deletedDevice = await Device.findOneAndDelete({ _id: deviceId }).lean();
+    const deletedDevice = await Device.findOneAndDelete({ _id: deviceId, userId }).lean();
     console.log("Deleted device result:", deletedDevice);
 
     if (!deletedDevice) {
@@ -84,9 +103,13 @@ export const upDateDevice = async(req:Request,res:Response)=>{
     try{
         const{deviceId} = req.params;
         const updates = req.body;
+        const userId = (req as any).userId;
+        if (!userId) {
+          return res.status(401).json({ error: 'Unauthorized' });
+        }
 
-        const updateDevice = await Device.findByIdAndUpdate(
-            deviceId,
+        const updateDevice = await Device.findOneAndUpdate(
+            { _id: deviceId, userId },
             updates,
             {new:true,runValidators:true}
         )
@@ -107,13 +130,17 @@ export const updateDevicePartially = async(req:Request,res:Response)=>{
     try{
         const{deviceId} = req.params;
         const{state} = req.body;
+        const userId = (req as any).userId;
+        if (!userId) {
+          return res.status(401).json({ error: 'Unauthorized' });
+        }
 
              if (!["ON", "OFF"].includes(state)) {
             return res.status(400).json({ error: "State must be ON or OFF" });
         }
 
-        const updatedDevice = await Device.findByIdAndUpdate(
-            deviceId,
+        const updatedDevice = await Device.findOneAndUpdate(
+            { _id: deviceId, userId },
             { state },                  
             { new: true, runValidators: true }
         );

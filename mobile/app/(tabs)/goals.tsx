@@ -25,12 +25,15 @@ export default function GoalsIndex() {
   const [statusFilter, setStatusFilter] = useState<'Active' | 'Completed' | 'Archived'>('Active');
 
   const userId = useAuthStore(state => state.user?.user._id);
+  const token = useAuthStore(state => state.user?.token);
   // Fetch goals
   useEffect(() => {
     if (!userId) return;
     const fetchGoals = async () => {
       try {
-        const res = await fetch(`${BASE_URL}?userId=${userId}`);
+        const res = await fetch(`${BASE_URL}?userId=${userId}` , {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         const data = await res.json();
         setGoals(data);
       } catch (err) {
@@ -46,7 +49,9 @@ export default function GoalsIndex() {
 useEffect(() => {
   const fetchDevices = async () => {
     try {
-      const res = await fetch(`${API_BASE}/get-all-devices`);
+      const res = await fetch(`${API_BASE}/get-all-devices`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       const data = await res.json();
       setAllDevices(data.devices); // assuming response: { devices: [{ _id, device_name }, ...] }
     } catch (err) {
@@ -65,7 +70,10 @@ useEffect(() => {
     try {
       const res = await fetch(BASE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ ...goal, userId }),
       });
       if (!res.ok) throw new Error('Failed to add goal');
@@ -135,7 +143,10 @@ const saveEdit = async () => {
   try {
     const res = await fetch(`${BASE_URL}/${currentGoal.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(updatedGoal),
     });
     if (!res.ok) throw new Error('Failed to update goal');
@@ -156,7 +167,10 @@ const saveEdit = async () => {
         text: 'Delete',
         onPress: async () => {
           try {
-            const res = await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${BASE_URL}/${id}`, {
+              method: 'DELETE',
+              headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            });
             if (!res.ok) throw new Error('Failed to delete goal');
             setGoals(prev => prev.filter(g => g.id !== id));
           } catch (err) {
@@ -190,7 +204,10 @@ const saveEdit = async () => {
   try {
     const res = await fetch(`${BASE_URL}/${goal.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({ ...goal, status }),
     });
     if (!res.ok) throw new Error('Failed to update status');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from '../../store/authStore';
 import { View, Platform, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { Picker } from '@react-native-picker/picker';
@@ -7,6 +7,7 @@ import axios from "axios";
 import { router } from 'expo-router';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { API_BASE } from '../../constants/index'
+import { useFocusEffect } from '@react-navigation/native';
 
 const getBackendUrl = () => {
   return `${API_BASE}/costs/energy-cost`;
@@ -29,6 +30,7 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
   const [items, setItems] = useState<{ label: string, value: string }[]>([]);
 
   const userId = useAuthStore(state => state.user?.user._id);
+  const token = useAuthStore(state => state.user?.token);
 
   const handleSubmit = async () => {
     if (!userId) {
@@ -57,7 +59,10 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
       setLoading(true);
       const res = await fetch(getBackendUrl(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
@@ -80,10 +85,11 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
     }
   };
 
-  useEffect(() => {
-    const fetchDevices = async () => {
+  const fetchDevices = useCallback(async () => {
       try {
-        const res = await axios.get(`${API_BASE}/get-all-devices`);
+        const res = await axios.get(`${API_BASE}/get-all-devices`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         if (res.status === 200) {
           const devicesArray = res.data.devices || [];
           setDevices(devicesArray);
@@ -95,9 +101,17 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
       } catch (err) {
         console.log('Error fetching devices', err);
       }
-    };
+  }, [API_BASE, token]);
+
+  useEffect(() => {
     fetchDevices();
-  }, []);
+  }, [fetchDevices]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchDevices();
+    }, [fetchDevices])
+  );
 
   useEffect(() => {
     if (value) {

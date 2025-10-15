@@ -71,6 +71,7 @@ type ConsumptionInput = {
 export default function Consumptions () {
   const user = useAuthStore(state => state.user)
   const userId = user?.user?._id
+   const auth = useAuthStore();
   // Local state
   const [devices, setDevices] = useState<DeviceItemResponse[]>([])
   const [loading, setLoading] = useState(false)
@@ -87,14 +88,9 @@ export default function Consumptions () {
     setLoading(true)
     try {
       if (!user?.token) return;
-      const res = await axios.get<DevicesApiResponse>(
-        `${API_BASE}/get-all-devices`,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`
-          }
-        }
-      )
+       const res = await axios.get(`${API_BASE}/get-all-devices`, {
+        headers: auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : undefined,
+      });
       const deviceList: DeviceItemResponse[] = res.data?.devices || []
       setDevices(deviceList)
     } catch (err) {
@@ -113,7 +109,7 @@ export default function Consumptions () {
     try {
       if (!user?.token || !userId) return;
       const res = await axios.get<ConsumptionsApiResponse>(
-        `${API_BASE}/consumptions?userId=${userId}`,
+        `${API_BASE}/consumptions`,
         {
           headers: {
             Authorization: `Bearer ${user?.token}`
@@ -148,6 +144,11 @@ export default function Consumptions () {
           hours,
           minutes
         },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`
+          }
+        }
       )
 
       return res.data // contains { success, data }

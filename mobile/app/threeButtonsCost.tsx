@@ -39,6 +39,7 @@ const CostSheetApp = () => {
   const [reportData, setReportData] = useState<ReportData[]>([]);
   const [totalCost, setTotalCost] = useState(0);
   const userId = useAuthStore(state => state.user?.user._id);
+  const token = useAuthStore(state => state.user?.token);
 
   useEffect(() => {
     if (!userId) return;
@@ -53,7 +54,9 @@ const CostSheetApp = () => {
     if (!userId) return;
     try {
       setLoading(true);
-      const response = await fetch(`${BACKEND_URL}?userId=${userId}`);
+      const response = await fetch(`${BACKEND_URL}?userId=${userId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
 
@@ -77,7 +80,9 @@ const CostSheetApp = () => {
     if (!userId) return;
     try {
       setLoading(true);
-      const response = await fetch(`${BACKEND_URL}?userId=${userId}`);
+      const response = await fetch(`${BACKEND_URL}?userId=${userId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
 

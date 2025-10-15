@@ -29,6 +29,7 @@ export default function HomeScreen() {
   
 
     const userId = useAuthStore(state => state.user?.user._id);
+    const token = useAuthStore(state => state.user?.token);
  
   useFocusEffect(
     useCallback(() => {
@@ -54,7 +55,9 @@ export default function HomeScreen() {
   const fetchDevices = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/get-all-devices`);
+      const res = await axios.get(`${API_BASE}/get-all-devices`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       const list: DeviceItem[] = res.data?.devices || [];
       setDevices(list);
       setFilteredDevices(list);
@@ -83,7 +86,8 @@ export default function HomeScreen() {
       };
       const res = await axios.put(
         `${API_BASE}/update-device/${updated._id}`,
-        payload
+        payload,
+        { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
       );
       
       const updatedDevice = res.data?.updateDevice || res.data?.data || updated;
@@ -109,7 +113,8 @@ export default function HomeScreen() {
     try {
       await axios.patch(
         `${API_BASE}/updatePartially/${device._id}/state`,
-        { state: newState }
+        { state: newState },
+        { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
       );
     } catch (err) {
       console.log("Toggle state error", err);

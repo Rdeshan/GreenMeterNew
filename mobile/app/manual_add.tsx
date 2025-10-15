@@ -18,6 +18,7 @@ import Constants from 'expo-constants';
 import styles from '@/components/device_management/display_home/styles_manual_add'
 import { useRouter } from 'expo-router'; // <-- added
 import { API_BASE } from '../constants/index'
+import { useAuthStore } from '@/store/authStore'
 
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -274,6 +275,7 @@ interface ManualAddScreenProps {
 
 const ManualAddScreen: React.FC<ManualAddScreenProps> = ({ onClose }) => {
   const router = useRouter(); // <-- added
+  const auth = useAuthStore();
   const [form, setForm] = useState<FormState>({
     deviceName: '',
     type: '',
@@ -325,7 +327,10 @@ const ManualAddScreen: React.FC<ManualAddScreenProps> = ({ onClose }) => {
     try {
       const res = await fetch(getBackendUrl(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
