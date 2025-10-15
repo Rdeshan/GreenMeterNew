@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useAuthStore } from '../../store/authStore';
 import { Ionicons } from '@expo/vector-icons'; 
 import { TouchableOpacity, StyleSheet, FlatList, View, TextInput, Button, Alert, Text, Modal, ActivityIndicator, ScrollView } from 'react-native';
 import { ThemedView } from '../../components/ThemedView';
@@ -23,11 +24,13 @@ export default function GoalsIndex() {
   const [allDevices, setAllDevices] = useState<{_id: string, device_name: string}[]>([]);
   const [statusFilter, setStatusFilter] = useState<'Active' | 'Completed' | 'Archived'>('Active');
 
+  const userId = useAuthStore(state => state.user?.user._id);
   // Fetch goals
   useEffect(() => {
+    if (!userId) return;
     const fetchGoals = async () => {
       try {
-        const res = await fetch(BASE_URL);
+        const res = await fetch(`${BASE_URL}?userId=${userId}`);
         const data = await res.json();
         setGoals(data);
       } catch (err) {
@@ -37,7 +40,7 @@ export default function GoalsIndex() {
       }
     };
     fetchGoals();
-  }, []);
+  }, [userId]);
 
 // Fetch all devices once
 useEffect(() => {
@@ -55,11 +58,15 @@ useEffect(() => {
 
   // Add goal
   const handleAddGoal = async (goal: Goal) => {
+    if (!userId) {
+      Alert.alert('Error', 'No user ID found. Please login again.');
+      return;
+    }
     try {
       const res = await fetch(BASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(goal),
+        body: JSON.stringify({ ...goal, userId }),
       });
       if (!res.ok) throw new Error('Failed to add goal');
 

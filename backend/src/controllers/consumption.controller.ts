@@ -6,7 +6,7 @@ import AiGenerate from '../config/gemini.config'
 // Create consumption record
 export const addConsumptionController = async (req: any, res: Response) => {
   try {
-    // const userId = req.userId
+    const userId = req.body.userId
 
     const { deviceId, hours, minutes } = req.body
 
@@ -18,7 +18,7 @@ export const addConsumptionController = async (req: any, res: Response) => {
     }
 
     const consumption = new Consumption({
-      // user: userId,
+      user: userId,
       device: deviceId,
       hours,
       minutes
@@ -61,14 +61,19 @@ export const addConsumptionController = async (req: any, res: Response) => {
 // Get all consumptions
 export const getAllConsumptionsController = async (req: any, res: Response) => {
   try {
-    const consumptions = await Consumption.find()
+    // userId should be set by auth middleware from token
+    const userId = req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: No user ID found' });
+    }
+    const consumptions = await Consumption.find({ user: userId })
       .select('-recommendations -summary')
       .populate('device')
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 });
 
-    res.json({ success: true, data: consumptions })
+    res.json({ success: true, data: consumptions });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message })
+    res.status(500).json({ success: false, message: error.message });
   }
 }
 

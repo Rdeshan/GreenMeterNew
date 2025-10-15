@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { 
   View, 
   Text, 
@@ -37,17 +38,19 @@ const CostSheetApp = () => {
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState<ReportData[]>([]);
   const [totalCost, setTotalCost] = useState(0);
-  const [userId] = useState('USR001'); // Replace with actual user ID
+  const userId = useAuthStore(state => state.user?.user._id);
 
   useEffect(() => {
+    if (!userId) return;
     if (selectedCategory === 'power') {
       fetchPowerReport();
     } else {
       fetchTimeReport();
     }
-  }, [selectedCategory, selectedPowerSub, selectedTimeSub]);
+  }, [selectedCategory, selectedPowerSub, selectedTimeSub, userId]);
 
   const fetchPowerReport = async () => {
+    if (!userId) return;
     try {
       setLoading(true);
       const response = await fetch(`${BACKEND_URL}?userId=${userId}`);
@@ -71,6 +74,7 @@ const CostSheetApp = () => {
   };
 
   const fetchTimeReport = async () => {
+    if (!userId) return;
     try {
       setLoading(true);
       const response = await fetch(`${BACKEND_URL}?userId=${userId}`);
@@ -83,6 +87,7 @@ const CostSheetApp = () => {
         const today = new Date();
 
         const filtered = allData.filter(item => {
+          if (!item.date) return false;
           const itemDate = new Date(item.date);
           if (selectedTimeSub === 'daily') {
             return itemDate.toDateString() === today.toDateString();

@@ -44,7 +44,7 @@ interface ConsumptionDetailAPIReespoonse {
 }
 
 export default function ConsumptionDetailScreen () {
-  // const user = useAuthStore(state => state.user)
+   const user = useAuthStore(state => state.user)
   const { id } = useLocalSearchParams<{ id: string }>()
   const [consumption, setData] = useState<ConsumptionDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -53,11 +53,11 @@ export default function ConsumptionDetailScreen () {
     try {
       const res = await axios.get<ConsumptionDetailAPIReespoonse>(
         `${API_BASE}/consumptions/${id}`,
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}` // 🟢 Attach token here
-        //   }
-        // }
+         {
+           headers: {
+             Authorization: `Bearer ${user?.token}` // 🟢 Attach token here
+           }
+         }
       )
       const consumptionDetail: ConsumptionDetail = res?.data?.data || ''
       setData(consumptionDetail)

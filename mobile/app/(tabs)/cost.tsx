@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useAuthStore } from '../../store/authStore';
 import { View, Platform, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import Constants from 'expo-constants';
@@ -14,7 +15,6 @@ const getBackendUrl = () => {
 
 const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
   const [type, setType] = useState("electricity");
-  const [userId, setUserId] = useState("");
   const [devices, setDevices] = useState<any[]>([]);
   const [watts, setWatts] = useState("");
   const [hoursPerDay, setHoursPerDay] = useState("");
@@ -28,7 +28,13 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
   const [value, setValue] = useState<string | null>(null);
   const [items, setItems] = useState<{ label: string, value: string }[]>([]);
 
+  const userId = useAuthStore(state => state.user?.user._id);
+
   const handleSubmit = async () => {
+    if (!userId) {
+      Alert.alert('Error', 'No user ID found. Please login again.');
+      return;
+    }
     let payload: any = { userId, type };
     if (value) payload.deviceId = value;
 
@@ -58,7 +64,7 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
       if (res.ok) {
         await res.json();
         Alert.alert('Success', 'Energy cost created successfully');
-        setUserId(""); setType("electricity"); setValue(null);
+        setType("electricity"); setValue(null);
         setWatts(""); setHoursPerDay(""); setFuelType("petrol");
         setLiters(""); setTankSize("12.5kg"); setSolarSavings("");
         onClose && onClose();
@@ -117,17 +123,7 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
       >
         {/* Main Form Card */}
         <View style={styles.formCard}>
-          {/* User ID Input */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>User ID</Text>
-            <TextInput 
-              style={styles.input} 
-              value={userId} 
-              onChangeText={setUserId}
-              placeholder="Enter user ID"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
+          {/* User ID Input removed: now using logged-in user's ID automatically */}
 
           {/* Type Selector */}
           <View style={styles.inputGroup}>

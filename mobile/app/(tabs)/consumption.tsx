@@ -70,6 +70,7 @@ type ConsumptionInput = {
 
 export default function Consumptions () {
   const user = useAuthStore(state => state.user)
+  const userId = user?.user?._id
   // Local state
   const [devices, setDevices] = useState<DeviceItemResponse[]>([])
   const [loading, setLoading] = useState(false)
@@ -85,13 +86,14 @@ export default function Consumptions () {
   const fetchDevices = async () => {
     setLoading(true)
     try {
+      if (!user?.token) return;
       const res = await axios.get<DevicesApiResponse>(
         `${API_BASE}/get-all-devices`,
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}` // 🟢 Attach token here
-        //   }
-        // }
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`
+          }
+        }
       )
       const deviceList: DeviceItemResponse[] = res.data?.devices || []
       setDevices(deviceList)
@@ -99,7 +101,7 @@ export default function Consumptions () {
       console.log('Fetch devices error', err)
       Alert.alert(
         'Error',
-        `Could not fetch devices. Check backend/CORS/IP. ${API_BASE}`
+        `Could not fetch devices. Check backend/CORS/IP. ${API_BASE}/get-all-devices`
       )
     } finally {
       setLoading(false)
@@ -109,22 +111,22 @@ export default function Consumptions () {
   const fetchConsumptions = async () => {
     setLoading(true)
     try {
+      if (!user?.token || !userId) return;
       const res = await axios.get<ConsumptionsApiResponse>(
-        `${API_BASE}/consumptions/`,
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}` // 🟢 Attach token here
-        //   }
-        // }
+        `${API_BASE}/consumptions?userId=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`
+          }
+        }
       )
       const consumptionsList: ConsumptionItemResponse[] = res.data?.data || []
-
       setConsumptionRecords(consumptionsList)
     } catch (err) {
       console.log('Fetch consumptions error', err)
       Alert.alert(
         'Error',
-        `Could not fetch consumptions. Check backend/CORS/IP. ${API_BASE}/consumptions/`
+        `Could not fetch consumptions. Check backend/CORS/IP. ${API_BASE}/consumptions?userId=${userId}`
       )
     } finally {
       setLoading(false)
@@ -137,18 +139,15 @@ export default function Consumptions () {
     minutes
   }: ConsumptionInput) => {
     try {
+      if (!userId) throw new Error('No user ID found. Please login again.');
       const res = await axios.post(
         `${API_BASE}/consumptions`,
         {
+          userId,
           deviceId,
           hours,
           minutes
         },
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}`
-        //   }
-        // }
       )
 
       return res.data // contains { success, data }
@@ -171,11 +170,11 @@ export default function Consumptions () {
           hours,
           minutes
         },
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}`
-        //   }
-        // }
+         {
+           headers: {
+     Authorization: `Bearer ${user?.token}`
+           }
+         }
       )
       return res.data // contains { success, data }
     } catch (err) {
@@ -189,11 +188,11 @@ export default function Consumptions () {
     try {
       const res = await axios.delete(
         `${API_BASE}/consumptions/${recordId}`,
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}`
-        //   }
-        // }
+         {
+           headers: {
+             Authorization: `Bearer ${user?.token}`
+           }
+         }
       )
       return res.data
     } catch (err) {

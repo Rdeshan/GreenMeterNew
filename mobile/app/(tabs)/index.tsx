@@ -26,7 +26,9 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<DeviceItem | null>(null);
   const [saving, setSaving] = useState(false);
+  
 
+    const userId = useAuthStore(state => state.user?.user._id);
  
   useFocusEffect(
     useCallback(() => {

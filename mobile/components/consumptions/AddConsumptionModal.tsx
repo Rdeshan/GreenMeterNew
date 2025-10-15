@@ -1,6 +1,6 @@
 // components/AddConsumptionModal.tsx
 import React, { useEffect, useState } from 'react';
-import { Platform, StyleSheet, TextInput, Modal, Alert, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet, TextInput, Modal, Alert, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -120,8 +120,9 @@ export default function AddConsumptionModal({ visible, devices, editingRecord, o
             animationType="slide"
             presentationStyle="pageSheet"
         >
-            <ThemedView style={styles.modalContainer}>
-                <ThemedView style={styles.modalHeader}>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+              <ThemedView style={styles.modalContainer}>
+                        <ThemedView style={styles.modalHeader}>
                     <ThemedText type="title" style={styles.modalTitle}>
                         {isEditMode ? 'Edit Energy Record' : 'Add Energy Record'}
                     </ThemedText>
@@ -150,27 +151,33 @@ export default function AddConsumptionModal({ visible, devices, editingRecord, o
                     <ThemedText style={styles.inputLabel}>Active Time</ThemedText>
                     <ThemedView style={styles.timeContainer}>
                         <ThemedView style={styles.timeInputContainer}>
-                            <TextInput
-                                style={styles.timeInput}
-                                placeholder="0"
-                                placeholderTextColor="#9CA3AF"
-                                value={hours}
-                                onChangeText={setHours}
-                                keyboardType="numeric"
-                            />
-                            <ThemedText style={styles.timeLabel}>hrs</ThemedText>
-                        </ThemedView>
-                        <ThemedView style={styles.timeInputContainer}>
-                            <TextInput
-                                style={styles.timeInput}
-                                placeholder="0"
-                                placeholderTextColor="#9CA3AF"
-                                value={minutes}
-                                onChangeText={setMinutes}
-                                keyboardType="numeric"
-                            />
-                            <ThemedText style={styles.timeLabel}>min</ThemedText>
-                        </ThemedView>
+                                <TextInput
+                                    style={styles.timeInput}
+                                    placeholder="0"
+                                    placeholderTextColor="#9CA3AF"
+                                    value={hours}
+                                    onChangeText={setHours}
+                                    keyboardType="numeric"
+                                    returnKeyType="done"
+                                    blurOnSubmit={true}
+                                    onSubmitEditing={() => Keyboard.dismiss()}
+                                />
+                                <ThemedText style={styles.timeLabel}>hrs</ThemedText>
+                            </ThemedView>
+                            <ThemedView style={styles.timeInputContainer}>
+                                <TextInput
+                                    style={styles.timeInput}
+                                    placeholder="0"
+                                    placeholderTextColor="#9CA3AF"
+                                    value={minutes}
+                                    onChangeText={setMinutes}
+                                    keyboardType="numeric"
+                                    returnKeyType="done"
+                                    blurOnSubmit={true}
+                                    onSubmitEditing={() => Keyboard.dismiss()}
+                                />
+                                <ThemedText style={styles.timeLabel}>min</ThemedText>
+                            </ThemedView>
                     </ThemedView>
 
                     {/* Device Info Display */}
@@ -200,6 +207,7 @@ export default function AddConsumptionModal({ visible, devices, editingRecord, o
                     </ThemedView>
                 </ThemedView>
             </ThemedView>
+    </TouchableWithoutFeedback>
         </Modal>
     );
 }
