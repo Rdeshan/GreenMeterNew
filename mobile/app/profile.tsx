@@ -1,11 +1,34 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { useAuthStore } from '../store/authStore';
+import { useRouter } from 'expo-router';
 
 const Profile = () => {
+  const logout = useAuthStore(state => state.logout);
+  const router = useRouter();
   const user = {
     name: 'Ravindu Perera',
     email: 'ravindu@example.com',
     avatar: 'https://i.pravatar.cc/150?img=12',
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: () => {
+            logout();
+            router.replace('/(auth)/login');
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (
@@ -44,7 +67,9 @@ const Profile = () => {
           paddingVertical: 14,
           marginTop: 16,
           alignItems: 'center',
-        }}>
+        }}
+        onPress={handleLogout}
+      >
         <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>Logout</Text>
       </TouchableOpacity>
     </ScrollView>

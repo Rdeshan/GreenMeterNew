@@ -4,7 +4,8 @@ import {
   ThemeProvider
 } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
+import React, { useEffect } from 'react'
+import { Stack, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 
@@ -18,6 +19,20 @@ export default function RootLayout () {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf')
   })
+
+  const router = useRouter()
+
+  // Wait for fonts to load before redirecting
+  useEffect(() => {
+    if (!loaded) return
+    // If there's no user, redirect to auth login; otherwise go to tabs
+    if (user) {
+      // ensure we're at the main tabs
+      router.replace('/(tabs)')
+    } else {
+      router.replace('/(auth)/login')
+    }
+  }, [loaded, user])
 
   if (!loaded) return null
 

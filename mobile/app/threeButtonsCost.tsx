@@ -6,27 +6,28 @@ import {
   StyleSheet, 
   ScrollView, 
   ActivityIndicator, 
-  Platform,
   Alert
 } from 'react-native';
-import Constants from 'expo-constants';
 import BackArrow from '@/components/CostThreeButtons/BackArrow';
-import { API_BASE } from '../constants/index'
+import { API_BASE } from '../constants/index';
 
 type Category = 'power' | 'time';
 type PowerSubCategory = 'electricity' | 'gas' | 'solar';
 type TimeSubCategory = 'daily' | 'weekly' | 'monthly';
 
 interface ReportData {
-  _id: string;
+  _id?: string;
+  type?: string;
   totalCost: number;
+  date?: string;
+  deviceId?: {
+    device_name?: string;
+  };
+  dailyKWh?: number;
+  monthlyKWh?: number;
 }
 
-const getBackendUrl = () => {
-  // For production
-  return `${API_BASE}/costs/energy-cost`;
-};
-
+const getBackendUrl = () => `${API_BASE}/costs/energy-cost`;
 const BACKEND_URL = getBackendUrl();
 
 const CostSheetApp = () => {
@@ -50,11 +51,9 @@ const CostSheetApp = () => {
     try {
       setLoading(true);
       const response = await fetch(`${BACKEND_URL}?userId=${userId}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      
+
       if (data.success) {
         const filtered = data.data.filter((item: any) => item.type === selectedPowerSub);
         const total = filtered.reduce((sum: number, item: any) => sum + item.totalCost, 0);
@@ -74,17 +73,33 @@ const CostSheetApp = () => {
   const fetchTimeReport = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${BACKEND_URL}/reports/${selectedTimeSub}/${userId}`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const response = await fetch(`${BACKEND_URL}?userId=${userId}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      
+
       if (data.success) {
-        setReportData(data.report || []);
-        const total = data.report?.reduce((sum: number, item: ReportData) => 
-          sum + item.totalCost, 0) || 0;
+        const allData: ReportData[] = data.data;
+
+        const today = new Date();
+
+        const filtered = allData.filter(item => {
+          const itemDate = new Date(item.date);
+          if (selectedTimeSub === 'daily') {
+            return itemDate.toDateString() === today.toDateString();
+          } else if (selectedTimeSub === 'weekly') {
+            const getWeek = (d: Date) => {
+              const oneJan = new Date(d.getFullYear(),0,1);
+              return Math.ceil((((d.getTime() - oneJan.getTime()) / 86400000) + oneJan.getDay()+1)/7);
+            };
+            return getWeek(itemDate) === getWeek(today);
+          } else if (selectedTimeSub === 'monthly') {
+            return itemDate.getMonth() === today.getMonth() && itemDate.getFullYear() === today.getFullYear();
+          }
+          return false;
+        });
+
+        const total = filtered.reduce((sum, item) => sum + item.totalCost, 0);
+        setReportData(filtered);
         setTotalCost(total);
       } else {
         throw new Error(data.message || 'Failed to fetch time report');
@@ -102,53 +117,26 @@ const CostSheetApp = () => {
       return (
         <View style={styles.topNavContainer}>
           <View style={styles.topNav}>
-            <Pressable
-              style={[
-                styles.topNavButton,
-                styles.topNavLeftButton,
-                selectedPowerSub === 'electricity' && styles.topNavSelectedButton
-              ]}
-              onPress={() => setSelectedPowerSub('electricity')}
-            >
-              <Text style={[
-                styles.topNavText,
-                selectedPowerSub === 'electricity' && styles.topNavSelectedText
-              ]}>
-                Electricity
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={[
-                styles.topNavButton,
-                styles.topNavMiddleButton,
-                selectedPowerSub === 'gas' && styles.topNavSelectedButton
-              ]}
-              onPress={() => setSelectedPowerSub('gas')}
-            >
-              <Text style={[
-                styles.topNavText,
-                selectedPowerSub === 'gas' && styles.topNavSelectedText
-              ]}>
-                Gas
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={[
-                styles.topNavButton,
-                styles.topNavRightButton,
-                selectedPowerSub === 'solar' && styles.topNavSelectedButton
-              ]}
-              onPress={() => setSelectedPowerSub('solar')}
-            >
-              <Text style={[
-                styles.topNavText,
-                selectedPowerSub === 'solar' && styles.topNavSelectedText
-              ]}>
-                Solar
-              </Text>
-            </Pressable>
+            {['electricity', 'gas', 'solar'].map((type, index) => (
+              <Pressable
+                key={type}
+                style={[
+                  styles.topNavButton,
+                  index === 0 && styles.topNavLeftButton,
+                  index === 1 && styles.topNavMiddleButton,
+                  index === 2 && styles.topNavRightButton,
+                  selectedPowerSub === type && styles.topNavSelectedButton
+                ]}
+                onPress={() => setSelectedPowerSub(type as PowerSubCategory)}
+              >
+                <Text style={[
+                  styles.topNavText,
+                  selectedPowerSub === type && styles.topNavSelectedText
+                ]}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </Text>
+              </Pressable>
+            ))}
           </View>
         </View>
       );
@@ -156,53 +144,26 @@ const CostSheetApp = () => {
       return (
         <View style={styles.topNavContainer}>
           <View style={styles.topNav}>
-            <Pressable
-              style={[
-                styles.topNavButton,
-                styles.topNavLeftButton,
-                selectedTimeSub === 'daily' && styles.topNavSelectedButton
-              ]}
-              onPress={() => setSelectedTimeSub('daily')}
-            >
-              <Text style={[
-                styles.topNavText,
-                selectedTimeSub === 'daily' && styles.topNavSelectedText
-              ]}>
-                Daily
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={[
-                styles.topNavButton,
-                styles.topNavMiddleButton,
-                selectedTimeSub === 'weekly' && styles.topNavSelectedButton
-              ]}
-              onPress={() => setSelectedTimeSub('weekly')}
-            >
-              <Text style={[
-                styles.topNavText,
-                selectedTimeSub === 'weekly' && styles.topNavSelectedText
-              ]}>
-                Weekly
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={[
-                styles.topNavButton,
-                styles.topNavRightButton,
-                selectedTimeSub === 'monthly' && styles.topNavSelectedButton
-              ]}
-              onPress={() => setSelectedTimeSub('monthly')}
-            >
-              <Text style={[
-                styles.topNavText,
-                selectedTimeSub === 'monthly' && styles.topNavSelectedText
-              ]}>
-                Monthly
-              </Text>
-            </Pressable>
+            {['daily', 'weekly', 'monthly'].map((type, index) => (
+              <Pressable
+                key={type}
+                style={[
+                  styles.topNavButton,
+                  index === 0 && styles.topNavLeftButton,
+                  index === 1 && styles.topNavMiddleButton,
+                  index === 2 && styles.topNavRightButton,
+                  selectedTimeSub === type && styles.topNavSelectedButton
+                ]}
+                onPress={() => setSelectedTimeSub(type as TimeSubCategory)}
+              >
+                <Text style={[
+                  styles.topNavText,
+                  selectedTimeSub === type && styles.topNavSelectedText
+                ]}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </Text>
+              </Pressable>
+            ))}
           </View>
         </View>
       );
@@ -233,81 +194,48 @@ const CostSheetApp = () => {
           }
         </Text>
 
-        {/* Total Cost Card */}
         <View style={styles.totalCard}>
           <Text style={styles.totalLabel}>Total Cost</Text>
           <Text style={styles.totalAmount}>LKR {totalCost.toFixed(2)}</Text>
           <Text style={styles.totalCount}>{reportData.length} entries</Text>
         </View>
 
-        {/* Data List */}
         {reportData.length > 0 ? (
           <View style={styles.dataList}>
-            {selectedCategory === 'power' ? (
-              reportData.map((item: any, index) => (
-                <View key={index} style={styles.dataCard}>
-                  <View style={styles.dataHeader}>
-                    <View style={styles.dataIconContainer}>
-                      <Text style={styles.dataIcon}>
-                        {item.type === 'electricity' ? '⚡' : 
-                         item.type === 'gas' ? '⛽' : '☀'}
-                      </Text>
-                    </View>
-                    <View style={styles.dataInfo}>
-                      <Text style={styles.dataTitle}>
-                        {item.deviceId?.device_name || item.type}
-                      </Text>
-                      <Text style={styles.dataSubtitle}>
-                        {new Date(item.date).toLocaleDateString()}
-                      </Text>
-                    </View>
-                    <Text style={styles.dataCost}>
-                      LKR {item.totalCost.toFixed(2)}
+            {reportData.map((item: any, index) => (
+              <View key={index} style={styles.dataCard}>
+                <View style={styles.dataHeader}>
+                  <View style={styles.dataIconContainer}>
+                    <Text style={styles.dataIcon}>
+                      {item.type === 'electricity' ? '⚡' : item.type === 'gas' ? '⛽' : '☀'}
                     </Text>
                   </View>
-                  {item.monthlyKWh && (
-                    <View style={styles.dataStats}>
-                      <View style={styles.statItem}>
-                        <Text style={styles.statLabel}>Daily kWh</Text>
-                        <Text style={styles.statValue}>
-                          {item.dailyKWh?.toFixed(2) || 'N/A'}
-                        </Text>
-                      </View>
-                      <View style={styles.statItem}>
-                        <Text style={styles.statLabel}>Monthly kWh</Text>
-                        <Text style={styles.statValue}>
-                          {item.monthlyKWh?.toFixed(2) || 'N/A'}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                </View>
-              ))
-            ) : (
-              reportData.map((item, index) => (
-                <View key={index} style={styles.dataCard}>
-                  <View style={styles.dataHeader}>
-                    <View style={styles.dataIconContainer}>
-                      <Text style={styles.dataIcon}>
-                        {item._id === 'electricity' ? '⚡' : 
-                         item._id === 'gas' ? '⛽' : '☀'}
-                      </Text>
-                    </View>
-                    <View style={styles.dataInfo}>
-                      <Text style={styles.dataTitle}>
-                        {item._id.charAt(0).toUpperCase() + item._id.slice(1)}
-                      </Text>
-                      <Text style={styles.dataSubtitle}>
-                        {selectedTimeSub} total
-                      </Text>
-                    </View>
-                    <Text style={styles.dataCost}>
-                      LKR {item.totalCost.toFixed(2)}
+                  <View style={styles.dataInfo}>
+                    <Text style={styles.dataTitle}>
+                      {item.deviceId?.device_name || item.type}
+                    </Text>
+                    <Text style={styles.dataSubtitle}>
+                      {selectedCategory === 'power'
+                        ? new Date(item.date).toLocaleDateString()
+                        : selectedTimeSub + ' total'}
                     </Text>
                   </View>
+                  <Text style={styles.dataCost}>LKR {item.totalCost.toFixed(2)}</Text>
                 </View>
-              ))
-            )}
+                {item.monthlyKWh && (
+                  <View style={styles.dataStats}>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statLabel}>Daily kWh</Text>
+                      <Text style={styles.statValue}>{item.dailyKWh?.toFixed(2) || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statLabel}>Monthly kWh</Text>
+                      <Text style={styles.statValue}>{item.monthlyKWh?.toFixed(2) || 'N/A'}</Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            ))}
           </View>
         ) : (
           <View style={styles.emptyState}>
@@ -325,9 +253,9 @@ const CostSheetApp = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-         <View style={styles.headerRow}>
-        <BackArrow style={styles.backArrow}/>
-        <Text style={styles.headerTitle}>💡 Cost Reports</Text>
+        <View style={styles.headerRow}>
+          <BackArrow style={styles.backArrow}/>
+          <Text style={styles.headerTitle}>💡 Cost Reports</Text>
         </View>
         <Text style={styles.headerSubtitle}>Track your energy expenses</Text>
       </View>
@@ -349,10 +277,7 @@ const CostSheetApp = () => {
               onPress={() => setSelectedCategory('power')}
             >
               <Text style={styles.categoryEmoji}>⚡</Text>
-              <Text style={[
-                styles.categoryButtonText,
-                selectedCategory === 'power' && styles.categorySelectedText
-              ]}>
+              <Text style={[styles.categoryButtonText, selectedCategory === 'power' && styles.categorySelectedText]}>
                 Power
               </Text>
             </Pressable>
@@ -366,10 +291,7 @@ const CostSheetApp = () => {
               onPress={() => setSelectedCategory('time')}
             >
               <Text style={styles.categoryEmoji}>🕐</Text>
-              <Text style={[
-                styles.categoryButtonText,
-                selectedCategory === 'time' && styles.categorySelectedText
-              ]}>
+              <Text style={[styles.categoryButtonText, selectedCategory === 'time' && styles.categorySelectedText]}>
                 Time
               </Text>
             </Pressable>
@@ -382,7 +304,6 @@ const CostSheetApp = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
