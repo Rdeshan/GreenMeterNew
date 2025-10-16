@@ -7,7 +7,8 @@ import {
   StyleSheet, 
   ScrollView, 
   ActivityIndicator, 
-  Alert
+  Alert,
+  TouchableOpacity
 } from 'react-native';
 import BackArrow from '@/components/CostThreeButtons/BackArrow';
 import { API_BASE } from '../constants/index';
@@ -40,6 +41,41 @@ const CostSheetApp = () => {
   const [totalCost, setTotalCost] = useState(0);
   const userId = useAuthStore(state => state.user?.user._id);
   const token = useAuthStore(state => state.user?.token);
+
+  const handleDeleteCost = async (itemId: string) => {
+    Alert.alert(
+      'Delete Cost Entry',
+      'Are you sure you want to delete this cost entry?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const response = await fetch(`${BACKEND_URL}/${itemId}`, {
+                method: 'DELETE',
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+              });
+              if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+              
+              // Remove from local state
+              setReportData(prev => prev.filter(item => item._id !== itemId));
+              // Recalculate total
+              const newTotal = reportData.filter(item => item._id !== itemId)
+                .reduce((sum, item) => sum + item.totalCost, 0);
+              setTotalCost(newTotal);
+              
+              Alert.alert('Success', 'Cost entry deleted successfully');
+            } catch (error) {
+              console.error('Error deleting cost entry:', error);
+              Alert.alert('Error', 'Failed to delete cost entry. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   useEffect(() => {
     if (!userId) return;
@@ -230,7 +266,15 @@ const CostSheetApp = () => {
                         : selectedTimeSub + ' total'}
                     </Text>
                   </View>
-                  <Text style={styles.dataCost}>LKR {item.totalCost.toFixed(2)}</Text>
+                  <View style={styles.dataCostContainer}>
+                    <Text style={styles.dataCost}>LKR {item.totalCost.toFixed(2)}</Text>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleDeleteCost(item._id!)}
+                    >
+                      <Text style={styles.deleteIcon}>🗑️</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 {item.monthlyKWh && (
                   <View style={styles.dataStats}>
@@ -538,10 +582,23 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginTop: 2,
   },
+  dataCostContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   dataCost: {
     fontSize: 16,
     fontWeight: '700',
     color: '#16a34a',
+  },
+  deleteButton: {
+    padding: 4,
+    borderRadius: 4,
+  },
+  deleteIcon: {
+    fontSize: 16,
+    opacity: 0.7,
   },
   dataStats: {
     flexDirection: 'row',
