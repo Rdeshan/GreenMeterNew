@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   ScrollView,
   Alert,
@@ -21,6 +20,15 @@ const Profile = () => {
   const router = useRouter();
   const auth = useAuthStore((state) => state.user);
   const user = auth?.user;
+  const initials = (() => {
+    const nameStr = (user?.name || '').trim();
+    if (!nameStr) return 'U';
+    const parts = nameStr.split(/\s+/);
+    const first = parts[0]?.[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1]?.[0] || '' : '';
+    const val = (first + last).toUpperCase();
+    return val || 'U';
+  })();
   const token = useAuthStore((state) => state.user?.token);
   const setUser = useAuthStore((state) => state.setUser);
 
@@ -123,13 +131,13 @@ const Profile = () => {
     <>
       <ScrollView style={styles.container}>
 
-        <BackArrow/>
+        <View style={styles.backRow}>
+          <BackArrow/>
+        </View>
         <View style={styles.profileSection}>
-          
-          <Image
-            // replace with your image path
-            style={styles.profileImage}
-          />
+          <View style={styles.profileAvatar}>
+            <Text style={styles.avatarText}>{initials}</Text>
+          </View>
           <Text style={styles.profileName}>{user?.name || 'No Name'}</Text>
           <Text style={styles.profileEmail}>{user?.email || 'No Email'}</Text>
         </View>
@@ -270,17 +278,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f4f6f5',
     padding: 16,
+    paddingTop:40
+  },
+  backRow: {
+    
+    position:'absolute',
+    top:40
   },
   profileSection: {
     alignItems: 'center',
     marginTop: 30,
   },
-  profileImage: {
+  profileAvatar: {
     width: 110,
     height: 110,
     borderRadius: 55,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#2d6a4f',
     marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#fff',
+    fontSize: 44,
+    fontWeight: '800',
   },
   profileName: {
     fontSize: 22,
