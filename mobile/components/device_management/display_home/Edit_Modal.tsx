@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  Modal,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
   SafeAreaView,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import styles from "../All_Styles";
+
 import { DeviceItem } from "@/components/device_management/display_home/type/DeviceItem";
 
 type EditDeviceModalProps = {
@@ -54,56 +56,142 @@ export default function EditDeviceModal({
     }
   };
 
+  if (!visible || !device) return null;
+
   return (
-    
-      <SafeAreaView style={styles.modalContainer}>
-        <Text style={styles.modalTitle}>Edit Device</Text>
+    <SafeAreaView style={styles.overlay}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.modalContainer}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Edit Device</Text>
 
-        <TextInput
-          style={styles.input}
-          value={formData.device_name}
-          onChangeText={(t) => handleChange("device_name", t)}
-          placeholder="Device name"
-        />
-        <TextInput
-          style={styles.input}
-          value={formData.type}
-          onChangeText={(t) => handleChange("type", t)}
-          placeholder="Type (e.g., Electric)"
-        />
-        <TextInput
-          style={styles.input}
-          value={formData.location}
-          onChangeText={(t) => handleChange("location", t)}
-          placeholder="Location"
-        />
-        <TextInput
-          style={styles.input}
-          value={String(formData.consumption)}
-          onChangeText={(t) =>
-            handleChange("consumption", t === "" ? 0 : Number(t) || 0)
-          }
-          placeholder="Consumption (Watts)"
-          keyboardType="numeric"
-        />
+            <TextInput
+              style={styles.input}
+              value={formData.device_name}
+              onChangeText={(t) => handleChange("device_name", t)}
+              placeholder="Device name"
+              placeholderTextColor="#888"
+            />
 
-        <View style={styles.modalActions}>
-          <TouchableOpacity
-            style={[styles.modalBtn, styles.cancelBtn]}
-            onPress={onClose}
-          >
-            <Text style={styles.cancelBtnText}>Cancel</Text>
-          </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              value={formData.type}
+              onChangeText={(t) => handleChange("type", t)}
+              placeholder="Type (e.g., Electric)"
+              placeholderTextColor="#888"
+            />
 
-          <TouchableOpacity
-            style={[styles.modalBtn, styles.saveBtn]}
-            onPress={handleSave}
-            disabled={saving}
-          >
-            {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Save Changes</Text>}
-          </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              value={formData.location}
+              onChangeText={(t) => handleChange("location", t)}
+              placeholder="Location"
+              placeholderTextColor="#888"
+            />
+
+            <TextInput
+              style={styles.input}
+              value={String(formData.consumption)}
+              onChangeText={(t) =>
+                handleChange("consumption", t === "" ? 0 : Number(t) || 0)
+              }
+              placeholder="Consumption (Watts)"
+              placeholderTextColor="#888"
+              keyboardType="numeric"
+            />
+
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={onClose}
+              disabled={saving}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, styles.saveButton]}
+              onPress={handleSave}
+              disabled={saving}
+            >
+              {saving ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.saveText}>Save Changes</Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-      </SafeAreaView>
-   
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "90%",
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+    fontSize: 16,
+    color: "#333",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  cancelButton: {
+    backgroundColor: "#eee",
+  },
+  saveButton: {
+    backgroundColor: "#007AFF",
+  },
+  cancelText: {
+    color: "#333",
+    fontWeight: "600",
+  },
+  saveText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+});

@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     deviceInfoTitle: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#4338CA',
+        color: '#2d6a4f',
         marginBottom: 8,
     },
     deviceInfoText: {

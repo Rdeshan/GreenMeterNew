@@ -423,7 +423,8 @@ export default function Consumptions () {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#f0fdf4',
+    paddingTop:40
   },
   scrollView: {
     flex: 1,

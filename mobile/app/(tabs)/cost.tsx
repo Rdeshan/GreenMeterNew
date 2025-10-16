@@ -370,14 +370,14 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     
-    backgroundColor: "#16a34a",
+    backgroundColor: "#2d6a4f",
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#E5E7EB",
     overflow: 'hidden',
   },
   picker: {
-    color: "#1F2937",
+    color: "#FFC107",
   },
   dropdownStyle: {
     backgroundColor: "#FFFFFF",
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F9F4",
   },
   dropdownSelectedLabel: {
-    color: "#16a34a",
+    color: "#2d6a4f",
     fontWeight: "600",
   },
   dropdownPlaceholder: {
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#16a34a",
+    borderColor: "#FFC107",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -438,16 +438,16 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   reportButtonText: {
-    color: "#16a34a",
+    color: "#2d6a4f",
     fontSize: 16,
     fontWeight: "700",
   },
   submitButton: {
-    backgroundColor: "#16a34a",
+    backgroundColor: "#2d6a4f",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
-    shadowColor: "#16a34a",
+    shadowColor: "#2d6a4f",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
