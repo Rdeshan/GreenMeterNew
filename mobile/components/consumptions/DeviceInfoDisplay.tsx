@@ -40,7 +40,7 @@ export default function DeviceInfoDisplay({ device, hours, minutes }: DeviceInfo
 
 const styles = StyleSheet.create({
     deviceInfoContainer: {
-        backgroundColor: '#EEF2FF',
+        backgroundColor: '#F0F9F4',
         padding: 16,
         borderRadius: 8,
         marginBottom: 20,
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     },
     deviceInfoText: {
         fontSize: 14,
-        color: '#6366F1',
+        color: '#2d6a4f',
         marginBottom: 4,
     },
 });

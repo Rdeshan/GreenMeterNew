@@ -208,7 +208,9 @@ export default function ConsumptionDetailScreen () {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    paddingBottom: 100
+    paddingBottom: 100,
+    backgroundColor:'#F0F9F4',
+    
   },
   header: {
     flexDirection: 'row',

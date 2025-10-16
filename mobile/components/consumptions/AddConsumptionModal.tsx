@@ -133,7 +133,8 @@ export default function AddConsumptionModal({ visible, devices, editingRecord, o
                         <Picker
                             selectedValue={selectedDeviceId}
                             onValueChange={(itemValue) => setSelectedDeviceId(itemValue)}
-                            style={styles.picker}
+                            style={[styles.picker, { color: '#2d6a4f' }]} // text color
+  itemStyle={{ color: '#2d6a4f' }} 
                         >
                             {devices.map((device) => (
                                 <Picker.Item
@@ -224,7 +225,9 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         textAlign: 'center',
-        color: '#1E293B',
+        color: '#2d6a4f',
+        fontSize:20,
+        marginTop:-30
     },
     formContainer: {
         flex: 1,
@@ -237,11 +240,11 @@ const styles = StyleSheet.create({
         color: '#374151',
     },
     pickerContainer: {
-        backgroundColor: '#F8FAFC',
+        backgroundColor: '#F0F9F4',
         borderWidth: 1,
-        borderColor: '#D1D5DB',
+        borderColor: '#2d6a4f',
         borderRadius: 8,
-        marginBottom: 100,
+        marginBottom: 150,
     },
     picker: {
         height: 50,

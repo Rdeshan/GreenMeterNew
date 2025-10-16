@@ -256,7 +256,7 @@ const AIButton = ({ onPress }: { onPress: () => void }) => {
             <View style={styles.aiIcon}>
               <Text style={styles.aiIconText}>✨</Text>
             </View>
-            <Text style={styles.aiButtonText}>Add device with AI</Text>
+            <Text style={styles.aiButtonText}>Add device with Voice</Text>
             <View style={styles.aiAccent} />
           </View>
         </TouchableOpacity>

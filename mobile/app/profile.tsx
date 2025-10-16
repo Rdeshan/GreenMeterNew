@@ -14,6 +14,7 @@ import {
 import { useAuthStore } from '../store/authStore';
 import { useRouter } from 'expo-router';
 import { API_BASE } from '../constants/index';
+import BackArrow from '@/components/CostThreeButtons/BackArrow';
 
 const Profile = () => {
   const logout = useAuthStore((state) => state.logout);
@@ -121,7 +122,10 @@ const Profile = () => {
   return (
     <>
       <ScrollView style={styles.container}>
+
+        <BackArrow/>
         <View style={styles.profileSection}>
+          
           <Image
             // replace with your image path
             style={styles.profileImage}
