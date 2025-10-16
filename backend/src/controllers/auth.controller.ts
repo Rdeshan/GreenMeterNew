@@ -83,7 +83,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
           message: `Use this link to reset your password: ${resetLink}`,
           token: rawToken,
         },
-        { publicKey: 'server', privateKey: process.env.EMAILJS_PRIVATE_KEY! }
+        { publicKey: process.env.EMAILJS_PUBLIC_KEY!, privateKey: process.env.EMAILJS_PRIVATE_KEY! }
       )
     } catch (e) {
       console.error('EmailJS error', e)
@@ -112,6 +112,66 @@ export const resetPassword = async (req: Request, res: Response) => {
     user.password = await bcrypt.hash(newPassword, 10)
     user.resetPasswordToken = undefined as any
     user.resetPasswordExpires = undefined as any
+    await user.save()
+    return res.json({ message: 'Password reset successful' })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ message: 'Server error' })
+  }
+}
+
+export const forgotPasswordOtp = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body as { email: string }
+    if (!email) return res.status(400).json({ message: 'Email is required' })
+
+    const user = await User.findOne({ email })
+    if (!user) return res.status(200).json({ message: 'If the email exists, an OTP will be sent' })
+
+    const otp = (Math.floor(100000 + Math.random() * 900000)).toString() // 6-digit
+    const expires = new Date(Date.now() + 10 * 60 * 1000)
+
+    user.resetPasswordOtp = crypto.createHash('sha256').update(otp).digest('hex')
+    user.resetPasswordOtpExpires = expires
+    await user.save()
+
+    try {
+      await emailjs.send(
+        process.env.EMAILJS_SERVICE_ID!,
+        process.env.EMAILJS_TEMPLATE_ID!,
+        {
+          to_email: email,
+          name: 'GreenMeter Support',
+          time: new Date().toLocaleString(),
+          message: `Your password reset OTP is ${otp}. It expires in 10 minutes.`,
+          otp,
+        },
+        { publicKey: process.env.EMAILJS_PUBLIC_KEY!, privateKey: process.env.EMAILJS_PRIVATE_KEY! }
+      )
+    } catch (e) {
+      console.error('EmailJS error', e)
+    }
+
+    return res.status(200).json({ message: 'If the email exists, an OTP will be sent' })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ message: 'Server error' })
+  }
+}
+
+export const resetPasswordWithOtp = async (req: Request, res: Response) => {
+  try {
+    const { email, otp, newPassword } = req.body as { email: string; otp: string; newPassword: string }
+    if (!email || !otp || !newPassword) return res.status(400).json({ message: 'Missing fields' })
+    if (newPassword.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters' })
+
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex')
+    const user = await User.findOne({ email, resetPasswordOtp: hashedOtp, resetPasswordOtpExpires: { $gt: new Date() } })
+    if (!user) return res.status(400).json({ message: 'Invalid or expired OTP' })
+
+    user.password = await bcrypt.hash(newPassword, 10)
+    user.resetPasswordOtp = undefined as any
+    user.resetPasswordOtpExpires = undefined as any
     await user.save()
     return res.json({ message: 'Password reset successful' })
   } catch (err) {

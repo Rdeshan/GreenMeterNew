@@ -2,18 +2,25 @@ import React, { useState } from 'react'
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native'
 import axios from 'axios'
 import { API_BASE } from '../../constants/index'
-import { Link, useRouter } from 'expo-router'
+import { Link, useRouter, useLocalSearchParams } from 'expo-router'
 
 export default function ResetPassword () {
-  const [token, setToken] = useState('')
+  const params = useLocalSearchParams()
+  const prefillEmail = (params?.email as string) || ''
+  const [email, setEmail] = useState(prefillEmail)
+  const [otp, setOtp] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const onSubmit = async () => {
-    if (!token) {
-      Alert.alert('Missing token', 'Please paste the reset token from your email')
+    if (!email) {
+      Alert.alert('Missing email', 'Please enter your email')
+      return
+    }
+    if (!otp || otp.length !== 6) {
+      Alert.alert('Invalid OTP', 'Enter the 6-digit OTP sent to your email')
       return
     }
     if (!newPassword || newPassword.length < 8) {
@@ -27,7 +34,7 @@ export default function ResetPassword () {
 
     try {
       setLoading(true)
-      await axios.post(`${API_BASE}/auth/reset-password`, { token, newPassword })
+      await axios.post(`${API_BASE}/auth/reset-password-otp`, { email, otp, newPassword })
       Alert.alert('Success', 'Password reset successful. You can now login.', [
         { text: 'OK', onPress: () => router.replace('/(auth)/login') }
       ])
@@ -45,11 +52,21 @@ export default function ResetPassword () {
         <Image source={require('../../assets/images/authscreens.png')} style={styles.banner} />
         <Text style={styles.title}>Reset Password</Text>
         <TextInput
-          placeholder='Paste token here'
+          placeholder='Email'
           style={styles.input}
-          value={token}
-          onChangeText={setToken}
+          value={email}
+          onChangeText={setEmail}
           autoCapitalize='none'
+          keyboardType='email-address'
+        />
+        <TextInput
+          placeholder='6-digit OTP'
+          style={styles.input}
+          value={otp}
+          onChangeText={setOtp}
+          autoCapitalize='none'
+          keyboardType='number-pad'
+          maxLength={6}
         />
         <TextInput
           placeholder='New password (min 8 chars)'

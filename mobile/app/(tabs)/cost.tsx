@@ -146,7 +146,9 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
               <Picker 
                 selectedValue={type} 
                 onValueChange={(val) => setType(val)}
-                style={styles.picker}
+                 style={[styles.picker, { color: '#2d6a4f' }]} // text color
+  itemStyle={{ color: '#2d6a4f' }} 
+                
               >
                 <Picker.Item label="Electricity" value="electricity" />
                 <Picker.Item label="Gas" value="gas" />
@@ -220,7 +222,8 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
                   <Picker 
                     selectedValue={fuelType} 
                     onValueChange={(val) => setFuelType(val)}
-                    style={styles.picker}
+                    style={[styles.picker, { color: '#2d6a4f' }]} // text color
+  itemStyle={{ color: '#2d6a4f' }} 
                   >
                     <Picker.Item label="Petrol" value="petrol" />
                     <Picker.Item label="Diesel" value="diesel" />
@@ -249,7 +252,8 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
                     <Picker 
                       selectedValue={tankSize} 
                       onValueChange={(val) => setTankSize(val)}
-                      style={styles.picker}
+                      style={[styles.picker, { color: '#2d6a4f' }]} // text color
+  itemStyle={{ color: '#2d6a4f' }} 
                     >
                       <Picker.Item label="12.5 kg" value="12.5kg" />
                       <Picker.Item label="5 kg" value="5kg" />
@@ -370,14 +374,14 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     
-    backgroundColor: "#2d6a4f",
+    backgroundColor: "#f0fdf4",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#2d6a4f",
     overflow: 'hidden',
   },
   picker: {
-    color: "#FFC107",
+    color: "#2d6a4f",
   },
   dropdownStyle: {
     backgroundColor: "#FFFFFF",
@@ -430,7 +434,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#FFC107",
+    borderColor: "#2d6a4f",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,

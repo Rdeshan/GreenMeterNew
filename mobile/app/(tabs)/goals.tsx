@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { Ionicons } from '@expo/vector-icons'; 
-import { TouchableOpacity, StyleSheet, FlatList, View, TextInput, Button, Alert, Text, Modal, ActivityIndicator, ScrollView } from 'react-native';
+import { TouchableOpacity, StyleSheet, FlatList, View,Button, TextInput, Alert, Text, Modal, ActivityIndicator, ScrollView, Animated, Dimensions } from 'react-native';
 import { ThemedView } from '../../components/ThemedView';
 import { ThemedText } from '../../components/ThemedText';
 import { Goal } from '../../components/goals/types/goal';
@@ -53,9 +53,11 @@ useEffect(() => {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       const data = await res.json();
-      setAllDevices(data.devices); // assuming response: { devices: [{ _id, device_name }, ...] }
+      const payload = Array.isArray(data?.devices) ? data.devices : [];
+      setAllDevices(payload);
     } catch (err) {
       console.error('Failed to fetch devices:', err);
+      setAllDevices([]);
     }
   };
   fetchDevices();
@@ -221,8 +223,8 @@ const saveEdit = async () => {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Goals</ThemedText>
-      <Button title="Generate AI Goal" onPress={openGenerateGoalScreen} />
+      <ThemedText style={styles.titleColor} type="title">Goals</ThemedText>
+      <AIButton label="Generate AI Goal" onPress={openGenerateGoalScreen} />
      <Modal visible={generateModalVisible} animationType="slide">
   <GenerateGoalScreen onClose={closeGenerateGoalScreen} onAddGoal={handleAddGoal} />
 </Modal>
@@ -272,10 +274,10 @@ const saveEdit = async () => {
                 />
 
                 {/* Devices */}
-                {item.devices?.length > 0 && (
+                {Array.isArray(item.devices) && item.devices.length > 0 && (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.devicesRow}>
                   {item.devices.map(dId => {
-                    const device = allDevices.find(dev => dev._id === dId); // find full device
+                    const device = (allDevices || []).find(dev => dev._id === dId); // find full device
                     const name = device ? device.device_name : dId; // show name if found, fallback to ID
                     return (
                       <View key={dId} style={styles.deviceChip}>
@@ -386,13 +388,115 @@ const saveEdit = async () => {
   );
 }
 
+// --- Animated AI Button (matches Add device with AI style) ---
+const { width: screenWidth } = Dimensions.get('window');
+
+const Particle = ({ delay, duration }: { delay: number; duration: number }) => {
+  const translateY = useRef(new Animated.Value(0)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animate = () => {
+      translateY.setValue(0);
+      translateX.setValue(0);
+      opacity.setValue(0);
+      scale.setValue(0);
+
+      const randomX = (Math.random() - 0.5) * 100;
+      const randomY = -50 - Math.random() * 30;
+
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.timing(scale, { toValue: 0.5 + Math.random() * 0.5, duration: 300, useNativeDriver: true }),
+        ]),
+        Animated.parallel([
+          Animated.timing(translateY, { toValue: randomY, duration: duration, useNativeDriver: true }),
+          Animated.timing(translateX, { toValue: randomX, duration: duration, useNativeDriver: true }),
+          Animated.timing(opacity, { toValue: 0, duration: duration / 2, delay: duration / 2, useNativeDriver: true }),
+        ]),
+      ]).start(() => setTimeout(animate, Math.random() * 2000));
+    };
+    animate();
+  }, [delay, duration, translateY, translateX, opacity, scale]);
+
+  return (
+    <Animated.View
+      style={{
+        position: 'absolute', width: 4, height: 4, borderRadius: 2, backgroundColor: '#ffffff',
+        shadowColor: '#667eea', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.8, shadowRadius: 4,
+        transform: [{ translateX }, { translateY }, { scale }], opacity,
+      }}
+    />
+  );
+};
+
+function AIButton({ label, onPress }: { label: string; onPress: () => void }) {
+  const animatedValue = useRef(new Animated.Value(0)).current;
+  const glowValue = useRef(new Animated.Value(0)).current;
+  const waveValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const glowAnimation = Animated.loop(Animated.sequence([
+      Animated.timing(glowValue, { toValue: 1, duration: 2000, useNativeDriver: true }),
+      Animated.timing(glowValue, { toValue: 0, duration: 2000, useNativeDriver: true }),
+    ]));
+    const waveAnimation = Animated.loop(Animated.timing(waveValue, { toValue: 1, duration: 3000, useNativeDriver: true }));
+    glowAnimation.start();
+    waveAnimation.start();
+    return () => { glowAnimation.stop(); waveAnimation.stop(); };
+  }, []);
+
+  const handlePressIn = () => {
+    Animated.spring(animatedValue, { toValue: 1, useNativeDriver: true }).start();
+  };
+  const handlePressOut = () => {
+    Animated.spring(animatedValue, { toValue: 0, useNativeDriver: true }).start();
+    onPress();
+  };
+
+  const scale = animatedValue.interpolate({ inputRange: [0, 0.95], outputRange: [0.9, 0.95] });
+  const glowOpacity = glowValue.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.8] });
+  const waveScale = waveValue.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.02, 1] });
+  const waveOpacity = waveValue.interpolate({ inputRange: [0, 0.3, 0.7, 1], outputRange: [0, 0.8, 0.8, 0] });
+
+  return (
+    <View style={{ alignItems: 'center', marginVertical: 12 }}>
+      <Animated.View style={{ position: 'absolute', width: screenWidth * 0.8, height: 60, borderRadius: 30, backgroundColor: '#667eea', shadowColor: '#667eea', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 20, elevation: 10, opacity: glowOpacity }} />
+      <Animated.View style={{ position: 'absolute', width: screenWidth * 0.8 + 6, height: 66, borderRadius: 33, borderWidth: 2, borderColor: '#667eea', backgroundColor: 'transparent', opacity: waveOpacity, transform: [{ scale: waveScale }] }} />
+      <Animated.View style={{ position: 'absolute', width: screenWidth * 0.8 + 12, height: 72, borderRadius: 36, borderWidth: 1, borderColor: '#764ba2', opacity: waveOpacity.interpolate({ inputRange: [0, 1], outputRange: [0, 0.6] }), transform: [{ scale: waveScale.interpolate({ inputRange: [1, 1.02], outputRange: [1.01, 1.03] }) }] }} />
+
+      <View style={{ position: 'absolute', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+        {Array.from({ length: 12 }).map((_, idx) => (
+          <Particle key={idx} delay={idx * 200} duration={1500 + Math.random() * 1000} />
+        ))}
+      </View>
+
+      <Animated.View style={{ width: screenWidth * 0.8, height: 60, borderRadius: 30, transform: [{ scale }] }}>
+        <TouchableOpacity activeOpacity={1} onPressIn={handlePressIn} onPressOut={handlePressOut} style={{ flex: 1, borderRadius: 30, overflow: 'hidden' }}>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, backgroundColor: '#667eea' }}>
+            <View style={{ marginRight: 12, width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ fontSize: 16, color: '#fff' }}>✨</Text>
+            </View>
+            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>{label}</Text>
+            <View style={{ position: 'absolute', right: 16, width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.8)' }} />
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#ecf6edff',},
+  container: { flex: 1, paddingLeft:16,paddingRight:16,paddingTop:40, backgroundColor: '#ecf6edff',},
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { marginTop: 12, fontSize: 16, color: '#4CAF50' },
   filterRow: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 12 },
 filterButton: { padding: 8, borderRadius: 8, backgroundColor: '#4CAF50' },
-selectedFilterButton: { backgroundColor: '#FFC107' },
+selectedFilterButton: { backgroundColor: '#2d6a4f' },
 
 goalStatusRow: { flexDirection: 'row', marginTop: 8, gap: 8 },
 statusButton: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, backgroundColor: '#888' },
@@ -413,7 +517,11 @@ selectedStatusButton: { backgroundColor: '#2d6a4f' },
     shadowRadius: 3,
     elevation: 3,
   },
+ 
   goalTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
+   titleColor:{
+    color:'#2d6a4f',
+  },
   goalNotes: { fontSize: 14, color: '#666', marginVertical: 6 },
   goalMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
   priorityBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 },

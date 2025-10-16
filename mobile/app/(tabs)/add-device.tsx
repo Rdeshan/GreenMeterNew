@@ -187,6 +187,7 @@ const [search, setSearch] = useState("");
     {/*card start from here */}
     return (
       <View style={[styles.deviceCard, !isOn && styles.deviceCardOff]}>
+        
         <View style={styles.cardHeader}>
           <View style={styles.deviceIcon}>
             <Text style={styles.iconText}>{getDeviceIcon(item.type, item.device_name)}</Text>
@@ -246,6 +247,7 @@ const [search, setSearch] = useState("");
 
   return (
     <SafeAreaView style={styles.container}>
+      
       {/* Header */}
     
      
@@ -256,6 +258,13 @@ const [search, setSearch] = useState("");
         <SearchBar search={search} setSearch={setSearch} />
 
       </View>
+      <View style={stylesnm.titleContainer}>
+  <Text style={stylesnm.title}>Your Devices</Text>
+  <Text style={stylesnm.subtitle}>
+    Manage and monitor all the devices you’ve added
+  </Text>
+</View>
+
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -309,4 +318,29 @@ const [search, setSearch] = useState("");
     </SafeAreaView>
   );
 }
+const stylesnm = StyleSheet.create({
+  titleContainer: {
+  alignItems: 'flex-start',
+  marginTop: 10,
+  marginBottom: 5,
+  paddingHorizontal: 16,
+  paddingLeft:20
+},
+
+title: {
+  fontSize: 26, // adjust as you like
+  fontWeight: '800',
+  color: '#16a34a', // your app’s green color
+  textAlign: 'center',
+},
+
+subtitle: {
+  fontSize: 15,
+  color: '#2d6a4f',
+  marginTop: 6,
+  textAlign: 'center',
+},
+
+
+})
 

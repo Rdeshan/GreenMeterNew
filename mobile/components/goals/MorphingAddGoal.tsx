@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     elevation: 8,
     zIndex: 1000,
-    marginTop:60
+    marginTop:90
     
   },
   fabButton: {
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#6a994e',
   },
   selectedButton: {
-    backgroundColor: '#f4d35e',
+    backgroundColor: '#2d6a4f',
   },
   deviceCard: {
     flex: 1,

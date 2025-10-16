@@ -16,9 +16,9 @@ export default function ForgotPassword () {
     }
     try {
       setLoading(true)
-      await axios.post(`${API_BASE}/auth/forgot-password`, { email })
-      Alert.alert('Check your email', 'If the email exists, a reset link has been sent. The email also contains a token you can paste on the next screen.')
-      router.push('/(auth)/reset-password')
+      await axios.post(`${API_BASE}/auth/forgot-password-otp`, { email })
+      Alert.alert('OTP sent', 'If the email exists, a 6-digit OTP has been sent. It expires in 10 minutes.')
+      router.push({ pathname: '/(auth)/reset-password', params: { email } as any })
     } catch (err: any) {
       console.log(err.response?.data || err.message)
       Alert.alert('Error', err.response?.data?.message || 'Something went wrong')

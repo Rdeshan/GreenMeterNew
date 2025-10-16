@@ -57,12 +57,12 @@ export default function StatsContainer({ consumptionRecords, devices }: StatsCon
             </View>
 
             {/* Title */}
-            <View style={styles.titleContainer}>
-                <Text >Energy Records</Text>
-                <Text style={styles.subtitle}>
-                    Track your device usage and consumption
-                </Text>
-            </View>
+           <View style={styles.titleContainer}>
+  <Text style={styles.title}>Energy Records</Text>
+  <Text style={styles.subtitle}>
+    Track your device usage and consumption
+  </Text>
+</View>
 
             {/* Bottom Stats */}
             <View style={styles.bottomStats}>
@@ -109,11 +109,18 @@ const styles = StyleSheet.create({
     titleContainer: {
         marginBottom: 20,
         padding: 10,
+        
     },
+    title: {
+  fontSize: 24, // ✅ change size here (e.g., 24 = large)
+  fontWeight: '700', // optional, makes it bold
+  color: '#16a34a', // optional color
+},
     subtitle: {
         fontSize: 16,
         opacity: 0.7,
         marginTop: 4,
+        color: '#2d6a4f',
     },
     bottomStats: {
         flexDirection: 'row',
