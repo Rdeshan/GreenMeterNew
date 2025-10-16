@@ -351,7 +351,45 @@ const ManualAddScreen: React.FC<ManualAddScreenProps> = ({ onClose }) => {
   };
 
   const handleAIPress = () => {
-    Alert.alert('AI Feature', 'AI device detection coming soon!');
+    Alert.prompt(
+      'Add device with AI',
+      'Describe your device (e.g., "kitchen fan 60W"), we will fill details.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Create',
+          onPress: async (text?: string) => {
+            const description = (text || '').trim();
+            if (!description) return;
+            try {
+              setLoading(true);
+              const res = await fetch(`${API_BASE}/devices/ai`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : {}),
+                },
+                body: JSON.stringify({ description }),
+              });
+              if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                Alert.alert('Error', err.error || `Failed (${res.status})`);
+                return;
+              }
+              const data = await res.json();
+              Alert.alert('Success', `Added: ${data?.data?.device_name || 'Device'}`);
+              onClose();
+            } catch (e) {
+              console.log('AI add error', e);
+              Alert.alert('Error', 'Could not create device from description');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ],
+      'plain-text'
+    );
   };
 
   return (

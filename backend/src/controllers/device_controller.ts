@@ -163,6 +163,77 @@ export const updateDevicePartially = async(req:Request,res:Response)=>{
 }
 
 
+// Parse a natural language description and create a device for the authenticated user
+export const addDeviceFromDescription = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { description } = req.body as { description?: string };
+    if (!description || typeof description !== 'string' || !description.trim()) {
+      return res.status(400).json({ error: 'description is required' });
+    }
+
+    // Very simple heuristic parser. Example inputs:
+    // "Add kitchen fan 60W", "a living room LED light with 12 watts", "AC in bedroom 900W"
+    const lower = description.toLowerCase();
+
+    // Extract consumption (watts)
+    let consumption: number | undefined;
+    const wattMatch = lower.match(/(\d{1,5})\s*(w|watt|watts)\b/);
+    if (wattMatch) {
+      consumption = Number(wattMatch[1]);
+    }
+
+    // Extract location (common words)
+    const locations = ['kitchen','bedroom','living room','hall','garage','bathroom','garage','room','office','dining'];
+    let location: string | undefined = locations.find((loc) => lower.includes(loc));
+    if (!location) {
+      // single-word fallbacks
+      const singleLocs = ['kitchen','bedroom','hall','garage','bathroom','office','dining','living'];
+      location = singleLocs.find((loc) => lower.includes(loc));
+    }
+    if (location === 'living') location = 'living room';
+
+    // Extract type/name keywords
+    let type: string | undefined;
+    let device_name: string | undefined;
+    const keywordMap: Array<{ k: RegExp; name: string; type?: string }> = [
+      { k: /\bfan\b/, name: 'Fan', type: 'Electric' },
+      { k: /\bac\b|air\s*conditioner/, name: 'Air Conditioner', type: 'Electric' },
+      { k: /\b(light|bulb|led)\b/, name: 'Light', type: 'Electric' },
+      { k: /\bheater\b/, name: 'Heater', type: 'Electric' },
+      { k: /\bfridge|refrigerator\b/, name: 'Refrigerator', type: 'Electric' },
+      { k: /\bwasher|washing\s*machine\b/, name: 'Washing Machine', type: 'Electric' },
+    ];
+    for (const item of keywordMap) {
+      if (item.k.test(lower)) {
+        device_name = item.name;
+        type = item.type || type;
+        break;
+      }
+    }
+
+    // If we still don't have a device_name, fall back to first 3 words
+    if (!device_name) {
+      device_name = description.trim().split(/\s+/).slice(0, 3).join(' ');
+    }
+
+    const device = await Device.create({
+      userId,
+      device_name,
+      type: type || 'Electric',
+      location,
+      consumption,
+    });
+
+    return res.status(201).json({ data: device });
+  } catch (err) {
+    console.error('addDeviceFromDescription error', err);
+    return res.status(500).json({ error: 'Failed to create device from description' });
+  }
+}
+
 export default{
  saveDevice,
  getAllDevices,
@@ -170,6 +241,7 @@ export default{
  deleteDevice,
 upDateDevice,
  updateDevicePartially,
+ addDeviceFromDescription,
 
 }
 
