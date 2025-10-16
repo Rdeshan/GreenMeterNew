@@ -53,3 +53,30 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error' })
   }
 }
+
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' })
+
+    const { name, email, password } = req.body as { name?: string; email?: string; password?: string }
+
+    const updates: any = {}
+    if (typeof name === 'string') updates.name = name
+    if (typeof email === 'string') updates.email = email
+    if (typeof password === 'string' && password.trim().length > 0) {
+      updates.password = await bcrypt.hash(password, 10)
+    }
+
+    const updated = await User.findByIdAndUpdate(userId, updates, { new: true })
+    if (!updated) return res.status(404).json({ message: 'User not found' })
+
+    const safeUser = updated.toObject()
+    delete (safeUser as any).password
+
+    return res.json({ user: safeUser })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ message: 'Server error' })
+  }
+}
