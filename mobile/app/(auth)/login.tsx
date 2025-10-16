@@ -84,6 +84,10 @@ export default function Login () {
         <Text style={styles.linkText}>
           Don't have an account? <Link href='/(auth)/register'>Sign up</Link>
         </Text>
+
+        <Text style={styles.linkText}>
+          Forgot your password? <Link href='/(auth)/forgot-password'>Reset here</Link>
+        </Text>
       </View>
     </KeyboardAvoidingView>
   )

@@ -1,8 +1,6 @@
 // components/ConsumptionRecordCard.tsx
 import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet, TouchableOpacity,View,Text } from 'react-native';
 import { router } from 'expo-router';
 
 interface ConsumptionRecord {
@@ -44,125 +42,85 @@ export default function ConsumptionRecordCard({ record, device, onEdit, onDelete
 
     return (
         <TouchableOpacity onPress={() => router.push(`/consumption-detail/${record.id}` as any)}>
-        <ThemedView style={styles.recordCard}>
-            <ThemedView style={styles.recordHeader}>
-                <ThemedView style={styles.deviceIcon}>
-                    <ThemedText style={styles.deviceIconText}>
-                        {getDeviceIcon(record.device_name)}
-                    </ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.recordInfo}>
-                    <ThemedText style={styles.categoryText}>
-                        Category: Electricity
-                    </ThemedText>
-                    <ThemedText type="defaultSemiBold" style={styles.device_name}>
-                        Device name: {record.device_name}
-                    </ThemedText>
-                    <ThemedText style={styles.recordDetails}>
-                        Active for: {record.hours}h {record.minutes}m
-                    </ThemedText>
-                    <ThemedText style={styles.recordDetails}>
-                        Power usage: {device?.powerUsage}W
-                    </ThemedText>
-                    <ThemedText style={styles.recordDetails}>
-                        Energy consumed: {record.energyConsumed.toFixed(3)} kWh
-                    </ThemedText>
-                    <ThemedText style={styles.statusText}>
-                        Units burned {(record.energyConsumed/1000).toFixed(2)}
-                    </ThemedText>
-                    <ThemedText style={styles.statusText}>
-                        Created At {record.timestamp.toLocaleString()}
-                    </ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.recordActions}>
-                    <TouchableOpacity
-                        style={styles.actionButton}
-                        onPress={() => onEdit?.(record)}
-                    >
-                        <ThemedText style={styles.actionButtonText}>✏️</ThemedText>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.actionButton}
-                        onPress={() => onDelete?.(record.id)}
-                    >
-                        <ThemedText style={styles.actionButtonText}>🗑️</ThemedText>
-                    </TouchableOpacity>
-                </ThemedView>
-            </ThemedView>
-        </ThemedView>
+            <View style={styles.deviceCard}>
+                <View style={styles.cardHeader}>
+                    <View style={styles.deviceIconRound}>
+                        <Text style={styles.iconText}>{getDeviceIcon(record.device_name)}</Text>
+                    </View>
+                    <View style={styles.deviceInfo}>
+                        <Text style={styles.deviceName}>{record.device_name}</Text>
+                        <Text style={styles.deviceMeta}>
+                            ⏱ {record.hours}h {record.minutes}m • ⚡ {device?.powerUsage}W
+                        </Text>
+                    </View>
+                    <View style={styles.cardActions}>
+                        <TouchableOpacity style={styles.actionBtn} onPress={() => onEdit?.(record)}>
+                            <Text style={styles.actionBtnText}>✏️</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionBtn} onPress={() => onDelete?.(record.id)}>
+                            <Text style={styles.actionBtnText}>🗑️</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                <View>
+                    <View style={styles.statsRow}> 
+                        <View style={styles.statItem}>
+                            <Text style={styles.statLabel}>Energy</Text>
+                            <Text style={styles.statValue}>{record.energyConsumed.toFixed(3)} kWh</Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statLabel}>Units</Text>
+                            <Text style={styles.statValue}>{(record.energyConsumed/1000).toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statLabel}>Created</Text>
+                            <Text style={styles.statValue}>{record.timestamp.toLocaleDateString()}</Text>
+                        </View>
+                    </View>
+                </View>
+            </View>
         </TouchableOpacity>
     );
 }
 
 const styles = StyleSheet.create({
-    recordCard: {
-        backgroundColor: '#F8FAFC',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: '#E2E8F0',
+    deviceCard: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 16,
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 1,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 6,
+        borderWidth: 2,
+        borderColor: 'transparent',
     },
-    recordHeader: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
+    cardHeader: { 
+        flexDirection: 'row', 
+        alignItems: 'center',
+        marginBottom: 12,
     },
-    deviceIcon: {
-        width: 40,
-        height: 40,
-        backgroundColor: '#EEF2FF',
-        borderRadius: 8,
+    deviceIconRound: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: '#F0F9F4',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 12,
     },
-    deviceIconText: {
-        fontSize: 20,
-    },
-    recordInfo: {
-        flex: 1,
-    },
-    categoryText: {
-        fontSize: 10,
-        textTransform: 'uppercase',
-        opacity: 0.6,
-        letterSpacing: 0.5,
-        color: '#64748B',
-    },
-    device_name: {
-        fontSize: 16,
-        marginTop: 2,
-        marginBottom: 4,
-        color: '#1E293B',
-    },
-    recordDetails: {
-        fontSize: 14,
-        opacity: 0.8,
-        marginBottom: 2,
-        color: '#475569',
-    },
-    statusText: {
-        fontSize: 12,
-        opacity: 0.6,
-        marginTop: 4,
-        color: '#64748B',
-    },
-    recordActions: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    actionButton: {
-        padding: 8,
-    },
-    actionButtonText: {
-        fontSize: 16,
-    },
+    iconText: { fontSize: 22 },
+    deviceInfo: { flex: 1 },
+    deviceName: { fontSize: 18, fontWeight: '700', color: '#1F2937' },
+    deviceMeta: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+    cardActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    actionBtn: { padding: 8 },
+    actionBtnText: { fontSize: 16 },
+    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+    statItem: { alignItems: 'center', flex: 1 },
+    statLabel: { fontSize: 10, color: '#9CA3AF', textTransform: 'uppercase', fontWeight: '600' },
+    statValue: { fontSize: 14, color: '#374151', fontWeight: '600', marginTop: 2 },
 });

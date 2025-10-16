@@ -1,7 +1,7 @@
 // components/FloatingAddButton.tsx
 import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+import { StyleSheet, TouchableOpacity,Text } from 'react-native';
+
 
 interface FloatingAddButtonProps {
     onPress: () => void;
@@ -13,7 +13,7 @@ export default function FloatingAddButton({ onPress }: FloatingAddButtonProps) {
             style={styles.floatingButton}
             onPress={onPress}
         >
-            <ThemedText style={styles.floatingButtonText}>+</ThemedText>
+            <Text style={styles.floatingButtonText}>+</Text>
         </TouchableOpacity>
     );
 }
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
         right: 20,
         width: 56,
         height: 56,
-        backgroundColor: '#37cc70ff',
+        backgroundColor: '#2d6a4f',
         borderRadius: 28,
         alignItems: 'center',
         justifyContent: 'center',

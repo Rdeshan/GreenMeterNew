@@ -13,10 +13,14 @@ import goalRoutes from './routes/goal.routes';
 const app = express();
 
 // Middleware
-app.use(cors({ origin: '*' }));
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(helmet());
 app.use(express.json());
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/consumptions', consumptionRoutes)

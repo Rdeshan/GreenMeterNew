@@ -12,7 +12,7 @@ export const createGoal = async (req: Request, res: Response) => {
   try {
     const goalData = {
       ...req.body,
-      userId: DUMMY_USER_ID,
+      userId: req.body.userId,
       date: new Date(req.body.date),  // cast date string to Date
       time: req.body.time,
     };
@@ -32,7 +32,8 @@ export const createGoal = async (req: Request, res: Response) => {
 // Get all goals for a user
 export const getGoals = async (req: Request, res: Response) => {
   try {
-    const goals = await Goal.find({ userId: DUMMY_USER_ID });
+  const { userId } = req.query;
+  const goals = await Goal.find({ userId });
     res.status(200).json(goals);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch goals', error: err });

@@ -7,6 +7,7 @@ import { Goal } from './types/goal';
 import { BlurView } from 'expo-blur';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { API_BASE } from '../../constants/index'
+import { useAuthStore } from '@/store/authStore'
 
 const BASE_URL = `${API_BASE}/goals`; // replace 192.168.x.x with PC's LAN IP
 
@@ -24,6 +25,7 @@ const dummyDevices = [
 
 
 const AddGoal = forwardRef(({ onAddGoal }: AddGoalProps, ref) => {
+  const token = useAuthStore(state => state.user?.token);
   const [visible, setVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');

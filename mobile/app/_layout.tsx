@@ -4,6 +4,7 @@ import {
   ThemeProvider
 } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
+import React from 'react'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
@@ -19,15 +20,17 @@ export default function RootLayout () {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf')
   })
 
+  
+
   if (!loaded) return null
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+      <Stack screenOptions={{ headerShown: false }}>
         {user ? (
-          <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+          <Stack.Screen name='(tabs)'  />
         ) : (
-          <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+          <Stack.Screen name='(auth)'  />
         )}
         <Stack.Screen
           name='consumption-detail/[id]/index'

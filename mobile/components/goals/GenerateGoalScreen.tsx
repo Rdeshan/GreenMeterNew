@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
+import { useAuthStore } from '@/store/authStore';
 import { Goal } from './types/goal';
 import { DeviceItem } from "@/components/device_management/display_home/type/DeviceItem";
 import { API_BASE } from '../../constants/index'
@@ -30,6 +31,7 @@ type Props = {
 
 
 export default function GenerateGoalScreen({ onAddGoal, prefillGoal, onClose }: Props) {
+  const token = useAuthStore(state => state.user?.token);
   const [open, setOpen] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
 
@@ -62,6 +64,8 @@ const generateFromAI = async () => {
     // POST selected device IDs to backend. Only to get AI suggestion, NOT saving yet
     const res = await axios.post(`${API_BASE}/goals/generate-goal`, {
       devices: selectedDevices,
+    }, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
 
     const { data } = res;
@@ -98,7 +102,9 @@ const generateFromAI = async () => {
     const fetchDevices = async () => {
       setLoadingDevices(true);
       try {
-        const res = await axios.get(`${API_BASE}/get-all-devices`);
+        const res = await axios.get(`${API_BASE}/get-all-devices`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         const list: DeviceItem[] = res.data?.devices || [];
         setDevices(list);
       } catch (err) {

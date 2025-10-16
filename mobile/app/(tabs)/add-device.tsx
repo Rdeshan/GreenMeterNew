@@ -3,6 +3,7 @@ import {View,  Text,  TouchableOpacity,  StyleSheet,  FlatList,  SafeAreaView,  
   Platform,RefreshControl 
 } from "react-native";
 import axios from "axios";
+import { useAuthStore } from "@/store/authStore";
 import { useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from "../../components/device_management/All_Styles"
@@ -21,6 +22,7 @@ const { width: screenWidth } = Dimensions.get("window");
 
 
 export default function HomeScreen() {
+  const auth = useAuthStore();
   const [devices, setDevices] = useState<DeviceItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [filteredDevices, setFilteredDevices] = useState<DeviceItem[]>([]);
@@ -63,7 +65,9 @@ const [search, setSearch] = useState("");
   const fetchDevices = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/get-all-devices`);
+      const res = await axios.get(`${API_BASE}/get-all-devices`, {
+        headers: auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : undefined,
+      });
       const list: DeviceItem[] = res.data?.devices || [];
       setDevices(list);
       setFilteredDevices(list);
@@ -87,8 +91,9 @@ const [search, setSearch] = useState("");
           style: "destructive",
           onPress: async () => {
             try {
-              
-              await axios.delete(`${API_BASE}/delete-device/${device._id}`);
+              await axios.delete(`${API_BASE}/delete-device/${device._id}`,
+              { headers: auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : undefined }
+              );
               setDevices((prev) => prev.filter((d) => d._id !== device._id));
             } catch (err) {
               console.log("Delete error", err);
@@ -116,7 +121,8 @@ const [search, setSearch] = useState("");
       };
       const res = await axios.put(
         `${API_BASE}/update-device/${updated._id}`,
-        payload
+        payload,
+        { headers: auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : undefined }
       );
       
       const updatedDevice = res.data?.updateDevice || res.data?.data || updated;
@@ -142,7 +148,8 @@ const [search, setSearch] = useState("");
     try {
       await axios.patch(
         `${API_BASE}/updatePartially/${device._id}/state`,
-        { state: newState }
+        { state: newState },
+        { headers: auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : undefined }
       );
     } catch (err) {
       console.log("Toggle state error", err);
@@ -180,6 +187,7 @@ const [search, setSearch] = useState("");
     {/*card start from here */}
     return (
       <View style={[styles.deviceCard, !isOn && styles.deviceCardOff]}>
+        
         <View style={styles.cardHeader}>
           <View style={styles.deviceIcon}>
             <Text style={styles.iconText}>{getDeviceIcon(item.type, item.device_name)}</Text>
@@ -239,6 +247,7 @@ const [search, setSearch] = useState("");
 
   return (
     <SafeAreaView style={styles.container}>
+      
       {/* Header */}
     
      
@@ -249,6 +258,13 @@ const [search, setSearch] = useState("");
         <SearchBar search={search} setSearch={setSearch} />
 
       </View>
+      <View style={stylesnm.titleContainer}>
+  <Text style={stylesnm.title}>Your Devices</Text>
+  <Text style={stylesnm.subtitle}>
+    Manage and monitor all the devices you’ve added
+  </Text>
+</View>
+
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -302,4 +318,29 @@ const [search, setSearch] = useState("");
     </SafeAreaView>
   );
 }
+const stylesnm = StyleSheet.create({
+  titleContainer: {
+  alignItems: 'flex-start',
+  marginTop: 10,
+  marginBottom: 5,
+  paddingHorizontal: 16,
+  paddingLeft:20
+},
+
+title: {
+  fontSize: 26, // adjust as you like
+  fontWeight: '800',
+  color: '#16a34a', // your app’s green color
+  textAlign: 'center',
+},
+
+subtitle: {
+  fontSize: 15,
+  color: '#2d6a4f',
+  marginTop: 6,
+  textAlign: 'center',
+},
+
+
+})
 

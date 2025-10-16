@@ -18,6 +18,7 @@ import Constants from 'expo-constants';
 import styles from '@/components/device_management/display_home/styles_manual_add'
 import { useRouter } from 'expo-router'; // <-- added
 import { API_BASE } from '../constants/index'
+import { useAuthStore } from '@/store/authStore'
 
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -255,7 +256,7 @@ const AIButton = ({ onPress }: { onPress: () => void }) => {
             <View style={styles.aiIcon}>
               <Text style={styles.aiIconText}>✨</Text>
             </View>
-            <Text style={styles.aiButtonText}>Add device with AI</Text>
+            <Text style={styles.aiButtonText}>Add device with Voice</Text>
             <View style={styles.aiAccent} />
           </View>
         </TouchableOpacity>
@@ -274,6 +275,7 @@ interface ManualAddScreenProps {
 
 const ManualAddScreen: React.FC<ManualAddScreenProps> = ({ onClose }) => {
   const router = useRouter(); // <-- added
+  const auth = useAuthStore();
   const [form, setForm] = useState<FormState>({
     deviceName: '',
     type: '',
@@ -325,7 +327,10 @@ const ManualAddScreen: React.FC<ManualAddScreenProps> = ({ onClose }) => {
     try {
       const res = await fetch(getBackendUrl(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
@@ -346,7 +351,45 @@ const ManualAddScreen: React.FC<ManualAddScreenProps> = ({ onClose }) => {
   };
 
   const handleAIPress = () => {
-    Alert.alert('AI Feature', 'AI device detection coming soon!');
+    Alert.prompt(
+      'Add device with AI',
+      'Describe your device (e.g., "kitchen fan 60W"), we will fill details.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Create',
+          onPress: async (text?: string) => {
+            const description = (text || '').trim();
+            if (!description) return;
+            try {
+              setLoading(true);
+              const res = await fetch(`${API_BASE}/devices/ai`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : {}),
+                },
+                body: JSON.stringify({ description }),
+              });
+              if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                Alert.alert('Error', err.error || `Failed (${res.status})`);
+                return;
+              }
+              const data = await res.json();
+              Alert.alert('Success', `Added: ${data?.data?.device_name || 'Device'}`);
+              onClose();
+            } catch (e) {
+              console.log('AI add error', e);
+              Alert.alert('Error', 'Could not create device from description');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ],
+      'plain-text'
+    );
   };
 
   return (

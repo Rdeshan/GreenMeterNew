@@ -1,8 +1,8 @@
 // components/StatsContainer.tsx
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet,Text,View } from 'react-native';
+
+
 
 interface ConsumptionRecord {
     id: string;
@@ -41,44 +41,44 @@ export default function StatsContainer({ consumptionRecords, devices }: StatsCon
     return (
         <>
             {/* Header Stats */}
-            <ThemedView style={styles.statsContainer}>
-                <ThemedView style={styles.statCard}>
-                    <ThemedText type="defaultSemiBold" style={styles.statNumber}>
+            <View style={styles.statsContainer}>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>
                         {calculateTotalConsumption()} Wh
-                    </ThemedText>
-                    <ThemedText style={styles.statLabel}>Total Consumption</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.statCard}>
-                    <ThemedText type="defaultSemiBold" style={styles.statNumber}>
+                    </Text>
+                    <Text style={styles.statLabel}>Total Consumption</Text>
+                </View>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>
                         LKR {calculateCost()}
-                    </ThemedText>
-                    <ThemedText style={styles.statLabel}>Est. Cost</ThemedText>
-                </ThemedView>
-            </ThemedView>
+                    </Text>
+                    <Text style={styles.statLabel}>Est. Cost</Text>
+                </View>
+            </View>
 
             {/* Title */}
-            <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">Energy Records</ThemedText>
-                <ThemedText style={styles.subtitle}>
-                    Track your device usage and consumption
-                </ThemedText>
-            </ThemedView>
+           <View style={styles.titleContainer}>
+  <Text style={styles.title}>Energy Records</Text>
+  <Text style={styles.subtitle}>
+    Track your device usage and consumption
+  </Text>
+</View>
 
             {/* Bottom Stats */}
-            <ThemedView style={styles.bottomStats}>
-                <ThemedView style={styles.bottomStatCard}>
-                    <ThemedText type="defaultSemiBold" style={styles.bottomStatNumber}>
+            <View style={styles.bottomStats}>
+                <View style={styles.bottomStatCard}>
+                    <Text style={styles.bottomStatNumber}>
                         {consumptionRecords.length}
-                    </ThemedText>
-                    <ThemedText style={styles.bottomStatLabel}>Total Records</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.bottomStatCard}>
-                    <ThemedText type="defaultSemiBold" style={styles.bottomStatNumber}>
+                    </Text>
+                    <Text style={styles.bottomStatLabel}>Total Records</Text>
+                </View>
+                <View style={styles.bottomStatCard}>
+                    <Text style={styles.bottomStatNumber}>
                         {devices.length}
-                    </ThemedText>
-                    <ThemedText style={styles.bottomStatLabel}>Available Devices</ThemedText>
-                </ThemedView>
-            </ThemedView>
+                    </Text>
+                    <Text style={styles.bottomStatLabel}>Available Devices</Text>
+                </View>
+            </View>
         </>
     );
 }
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     },
     statCard: {
         flex: 1,
-        backgroundColor: '#10B981',
+        backgroundColor: '#2d6a4f',
         padding: 16,
         borderRadius: 12,
         alignItems: 'center',
@@ -109,11 +109,18 @@ const styles = StyleSheet.create({
     titleContainer: {
         marginBottom: 20,
         padding: 10,
+        
     },
+    title: {
+  fontSize: 24, // ✅ change size here (e.g., 24 = large)
+  fontWeight: '700', // optional, makes it bold
+  color: '#16a34a', // optional color
+},
     subtitle: {
         fontSize: 16,
         opacity: 0.7,
         marginTop: 4,
+        color: '#2d6a4f',
     },
     bottomStats: {
         flexDirection: 'row',

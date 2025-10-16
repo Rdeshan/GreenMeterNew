@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useAuthStore } from '../../store/authStore';
 import { View, Platform, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import Constants from 'expo-constants';
@@ -6,6 +7,7 @@ import axios from "axios";
 import { router } from 'expo-router';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { API_BASE } from '../../constants/index'
+import { useFocusEffect } from '@react-navigation/native';
 
 const getBackendUrl = () => {
   return `${API_BASE}/costs/energy-cost`;
@@ -14,7 +16,6 @@ const getBackendUrl = () => {
 
 const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
   const [type, setType] = useState("electricity");
-  const [userId, setUserId] = useState("");
   const [devices, setDevices] = useState<any[]>([]);
   const [watts, setWatts] = useState("");
   const [hoursPerDay, setHoursPerDay] = useState("");
@@ -28,7 +29,14 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
   const [value, setValue] = useState<string | null>(null);
   const [items, setItems] = useState<{ label: string, value: string }[]>([]);
 
+  const userId = useAuthStore(state => state.user?.user._id);
+  const token = useAuthStore(state => state.user?.token);
+
   const handleSubmit = async () => {
+    if (!userId) {
+      Alert.alert('Error', 'No user ID found. Please login again.');
+      return;
+    }
     let payload: any = { userId, type };
     if (value) payload.deviceId = value;
 
@@ -51,14 +59,17 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
       setLoading(true);
       const res = await fetch(getBackendUrl(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         await res.json();
         Alert.alert('Success', 'Energy cost created successfully');
-        setUserId(""); setType("electricity"); setValue(null);
+        setType("electricity"); setValue(null);
         setWatts(""); setHoursPerDay(""); setFuelType("petrol");
         setLiters(""); setTankSize("12.5kg"); setSolarSavings("");
         onClose && onClose();
@@ -74,10 +85,11 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
     }
   };
 
-  useEffect(() => {
-    const fetchDevices = async () => {
+  const fetchDevices = useCallback(async () => {
       try {
-        const res = await axios.get(`${API_BASE}/get-all-devices`);
+        const res = await axios.get(`${API_BASE}/get-all-devices`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         if (res.status === 200) {
           const devicesArray = res.data.devices || [];
           setDevices(devicesArray);
@@ -89,9 +101,17 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
       } catch (err) {
         console.log('Error fetching devices', err);
       }
-    };
+  }, [API_BASE, token]);
+
+  useEffect(() => {
     fetchDevices();
-  }, []);
+  }, [fetchDevices]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchDevices();
+    }, [fetchDevices])
+  );
 
   useEffect(() => {
     if (value) {
@@ -117,17 +137,7 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
       >
         {/* Main Form Card */}
         <View style={styles.formCard}>
-          {/* User ID Input */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>User ID</Text>
-            <TextInput 
-              style={styles.input} 
-              value={userId} 
-              onChangeText={setUserId}
-              placeholder="Enter user ID"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
+          {/* User ID Input removed: now using logged-in user's ID automatically */}
 
           {/* Type Selector */}
           <View style={styles.inputGroup}>
@@ -136,7 +146,9 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
               <Picker 
                 selectedValue={type} 
                 onValueChange={(val) => setType(val)}
-                style={styles.picker}
+                 style={[styles.picker, { color: '#2d6a4f' }]} // text color
+  itemStyle={{ color: '#2d6a4f' }} 
+                
               >
                 <Picker.Item label="Electricity" value="electricity" />
                 <Picker.Item label="Gas" value="gas" />
@@ -210,7 +222,8 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
                   <Picker 
                     selectedValue={fuelType} 
                     onValueChange={(val) => setFuelType(val)}
-                    style={styles.picker}
+                    style={[styles.picker, { color: '#2d6a4f' }]} // text color
+  itemStyle={{ color: '#2d6a4f' }} 
                   >
                     <Picker.Item label="Petrol" value="petrol" />
                     <Picker.Item label="Diesel" value="diesel" />
@@ -239,7 +252,8 @@ const EnergyForm = ({ onClose }: { onClose?: () => void }) => {
                     <Picker 
                       selectedValue={tankSize} 
                       onValueChange={(val) => setTankSize(val)}
-                      style={styles.picker}
+                      style={[styles.picker, { color: '#2d6a4f' }]} // text color
+  itemStyle={{ color: '#2d6a4f' }} 
                     >
                       <Picker.Item label="12.5 kg" value="12.5kg" />
                       <Picker.Item label="5 kg" value="5kg" />
@@ -360,14 +374,14 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     
-    backgroundColor: "#16a34a",
+    backgroundColor: "#f0fdf4",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#2d6a4f",
     overflow: 'hidden',
   },
   picker: {
-    color: "#1F2937",
+    color: "#2d6a4f",
   },
   dropdownStyle: {
     backgroundColor: "#FFFFFF",
@@ -404,7 +418,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F9F4",
   },
   dropdownSelectedLabel: {
-    color: "#16a34a",
+    color: "#2d6a4f",
     fontWeight: "600",
   },
   dropdownPlaceholder: {
@@ -420,7 +434,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#16a34a",
+    borderColor: "#2d6a4f",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -428,16 +442,16 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   reportButtonText: {
-    color: "#16a34a",
+    color: "#2d6a4f",
     fontSize: 16,
     fontWeight: "700",
   },
   submitButton: {
-    backgroundColor: "#16a34a",
+    backgroundColor: "#2d6a4f",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
-    shadowColor: "#16a34a",
+    shadowColor: "#2d6a4f",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

@@ -9,8 +9,7 @@ import {
   Text
 } from 'react-native'
 import { Platform } from 'react-native'
-import { ThemedText } from '@/components/ThemedText'
-import { ThemedView } from '@/components/ThemedView'
+
 import StatsContainer from '@/components/consumptions/StatsContainer'
 import ConsumptionRecordsList from '@/components/consumptions/ConsumptionRecordsList'
 import AddConsumptionModal from '@/components/consumptions/AddConsumptionModal'
@@ -70,6 +69,8 @@ type ConsumptionInput = {
 
 export default function Consumptions () {
   const user = useAuthStore(state => state.user)
+  const userId = user?.user?._id
+   const auth = useAuthStore();
   // Local state
   const [devices, setDevices] = useState<DeviceItemResponse[]>([])
   const [loading, setLoading] = useState(false)
@@ -85,21 +86,17 @@ export default function Consumptions () {
   const fetchDevices = async () => {
     setLoading(true)
     try {
-      const res = await axios.get<DevicesApiResponse>(
-        `${API_BASE}/get-all-devices`,
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}` // 🟢 Attach token here
-        //   }
-        // }
-      )
+      if (!user?.token) return;
+       const res = await axios.get(`${API_BASE}/get-all-devices`, {
+        headers: auth.user?.token ? { Authorization: `Bearer ${auth.user.token}` } : undefined,
+      });
       const deviceList: DeviceItemResponse[] = res.data?.devices || []
       setDevices(deviceList)
     } catch (err) {
       console.log('Fetch devices error', err)
       Alert.alert(
         'Error',
-        `Could not fetch devices. Check backend/CORS/IP. ${API_BASE}`
+        `${err} ,Could not fetch devices ${API_BASE}/get-all-devices`
       )
     } finally {
       setLoading(false)
@@ -109,22 +106,22 @@ export default function Consumptions () {
   const fetchConsumptions = async () => {
     setLoading(true)
     try {
+      if (!user?.token || !userId) return;
       const res = await axios.get<ConsumptionsApiResponse>(
-        `${API_BASE}/consumptions/`,
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}` // 🟢 Attach token here
-        //   }
-        // }
+        `${API_BASE}/consumptions`,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`
+          }
+        }
       )
       const consumptionsList: ConsumptionItemResponse[] = res.data?.data || []
-
       setConsumptionRecords(consumptionsList)
     } catch (err) {
       console.log('Fetch consumptions error', err)
       Alert.alert(
         'Error',
-        `Could not fetch consumptions. Check backend/CORS/IP. ${API_BASE}/consumptions/`
+        `Could not fetch consumptions. Check backend/CORS/IP. ${API_BASE}/consumptions?userId=${userId}`
       )
     } finally {
       setLoading(false)
@@ -137,18 +134,20 @@ export default function Consumptions () {
     minutes
   }: ConsumptionInput) => {
     try {
+      if (!userId) throw new Error('No user ID found. Please login again.');
       const res = await axios.post(
         `${API_BASE}/consumptions`,
         {
+          userId,
           deviceId,
           hours,
           minutes
         },
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}`
-        //   }
-        // }
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`
+          }
+        }
       )
 
       return res.data // contains { success, data }
@@ -171,11 +170,11 @@ export default function Consumptions () {
           hours,
           minutes
         },
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}`
-        //   }
-        // }
+         {
+           headers: {
+     Authorization: `Bearer ${user?.token}`
+           }
+         }
       )
       return res.data // contains { success, data }
     } catch (err) {
@@ -189,11 +188,11 @@ export default function Consumptions () {
     try {
       const res = await axios.delete(
         `${API_BASE}/consumptions/${recordId}`,
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${user?.token}`
-        //   }
-        // }
+         {
+           headers: {
+             Authorization: `Bearer ${user?.token}`
+           }
+         }
       )
       return res.data
     } catch (err) {
@@ -336,9 +335,9 @@ export default function Consumptions () {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size='large' color='#6366F1' />
-        <ThemedText style={styles.loadingText}>
+        <Text style={styles.loadingText}>
           Loading energy data...
-        </ThemedText>
+        </Text>
       </View>
     )
   }
@@ -384,11 +383,11 @@ export default function Consumptions () {
             }}
           />
         ) : (
-          <ThemedView style={styles.emptyState}>
-            <ThemedText style={styles.emptyStateText}>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>
               No energy records yet. Tap the + button to add your first record!
-            </ThemedText>
-          </ThemedView>
+            </Text>
+          </View>
         )}
       </ScrollView>
 
@@ -424,7 +423,8 @@ export default function Consumptions () {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#f0fdf4',
+    paddingTop:40
   },
   scrollView: {
     flex: 1,
