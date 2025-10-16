@@ -59,14 +59,11 @@ export const updateProfile = async (req: Request, res: Response) => {
     const userId = (req as any).userId
     if (!userId) return res.status(401).json({ message: 'Unauthorized' })
 
-    const { name, email, password } = req.body as { name?: string; email?: string; password?: string }
+    const { name, email } = req.body as { name?: string; email?: string }
 
     const updates: any = {}
     if (typeof name === 'string') updates.name = name
     if (typeof email === 'string') updates.email = email
-    if (typeof password === 'string' && password.trim().length > 0) {
-      updates.password = await bcrypt.hash(password, 10)
-    }
 
     const updated = await User.findByIdAndUpdate(userId, updates, { new: true })
     if (!updated) return res.status(404).json({ message: 'User not found' })
@@ -75,6 +72,30 @@ export const updateProfile = async (req: Request, res: Response) => {
     delete (safeUser as any).password
 
     return res.json({ user: safeUser })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ message: 'Server error' })
+  }
+}
+
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' })
+
+    const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string }
+    if (!currentPassword || !newPassword) return res.status(400).json({ message: 'Missing fields' })
+    if (newPassword.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters' })
+
+    const user = await User.findById(userId).select('+password')
+    if (!user || !user.password) return res.status(404).json({ message: 'User not found' })
+
+    const matches = await bcrypt.compare(currentPassword, user.password)
+    if (!matches) return res.status(400).json({ message: 'Current password is incorrect' })
+
+    user.password = await bcrypt.hash(newPassword, 10)
+    await user.save()
+    return res.json({ message: 'Password updated successfully' })
   } catch (err) {
     console.error(err)
     return res.status(500).json({ message: 'Server error' })

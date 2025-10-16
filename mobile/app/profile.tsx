@@ -15,7 +15,11 @@ const Profile = () => {
   const [editVisible, setEditVisible] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState(''); // removed from profile update flow
+  const [pwdModal, setPwdModal] = useState(false);
+  const [currentPwd, setCurrentPwd] = useState('');
+  const [newPwd, setNewPwd] = useState('');
+  const [changingPwd, setChangingPwd] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleLogout = () => {
@@ -53,7 +57,7 @@ const Profile = () => {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ name, email, password: password || undefined }),
+        body: JSON.stringify({ name, email }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -71,6 +75,38 @@ const Profile = () => {
       Alert.alert('Error', 'Could not update profile.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!newPwd || newPwd.length < 8) {
+      Alert.alert('Validation', 'New password must be at least 8 characters');
+      return;
+    }
+    try {
+      setChangingPwd(true);
+      const res = await fetch(`${API_BASE}/auth/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ currentPassword: currentPwd, newPassword: newPwd }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        Alert.alert('Error', err.message || `Failed (${res.status})`);
+        return;
+      }
+      Alert.alert('Success', 'Password updated');
+      setPwdModal(false);
+      setCurrentPwd('');
+      setNewPwd('');
+    } catch (e) {
+      console.log('Change password error', e);
+      Alert.alert('Error', 'Could not change password.');
+    } finally {
+      setChangingPwd(false);
     }
   };
 
@@ -111,6 +147,19 @@ const Profile = () => {
 
       <TouchableOpacity
         style={{
+          backgroundColor: '#111827',
+          borderRadius: 12,
+          paddingVertical: 14,
+          marginTop: 12,
+          alignItems: 'center',
+        }}
+        onPress={() => setPwdModal(true)}
+      >
+        <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>Change Password</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={{
           backgroundColor: '#EF4444',
           borderRadius: 12,
           paddingVertical: 14,
@@ -132,9 +181,7 @@ const Profile = () => {
             style={{ borderWidth:1, borderColor:'#ddd', borderRadius:8, padding:10, marginBottom:10 }} />
           <TextInput value={email} onChangeText={setEmail} placeholder="Email"
             keyboardType="email-address" style={{ borderWidth:1, borderColor:'#ddd', borderRadius:8, padding:10, marginBottom:10 }} />
-          <TextInput value={password} onChangeText={setPassword}
-            placeholder="New Password (optional)" secureTextEntry
-            style={{ borderWidth:1, borderColor:'#ddd', borderRadius:8, padding:10, marginBottom:16 }} />
+          {/* Password field removed from profile update */}
 
           <View style={{ flexDirection:'row', justifyContent:'space-between' }}>
             <TouchableOpacity onPress={() => setEditVisible(false)}
@@ -144,6 +191,25 @@ const Profile = () => {
             <TouchableOpacity disabled={saving} onPress={handleSaveProfile}
               style={{ padding:12, borderRadius:8, backgroundColor:'#16a34a', flex:1, marginLeft:8, alignItems:'center' }}>
               {saving ? <ActivityIndicator color="#fff" /> : <Text style={{ color:'#fff', fontWeight:'700' }}>Save</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+
+    <Modal visible={pwdModal} transparent animationType="slide" onRequestClose={() => setPwdModal(false)}>
+      <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
+        <View style={{ width:'90%', backgroundColor:'#fff', borderRadius:12, padding:16 }}>
+          <Text style={{ fontSize:18, fontWeight:'700', marginBottom:12 }}>Change Password</Text>
+          <TextInput value={currentPwd} onChangeText={setCurrentPwd} placeholder="Current Password" secureTextEntry style={{ borderWidth:1, borderColor:'#ddd', borderRadius:8, padding:10, marginBottom:10 }} />
+          <TextInput value={newPwd} onChangeText={setNewPwd} placeholder="New Password (min 8 chars)" secureTextEntry style={{ borderWidth:1, borderColor:'#ddd', borderRadius:8, padding:10, marginBottom:16 }} />
+
+          <View style={{ flexDirection:'row', justifyContent:'space-between' }}>
+            <TouchableOpacity onPress={() => setPwdModal(false)} style={{ padding:12, borderRadius:8, backgroundColor:'#ddd', flex:1, marginRight:8, alignItems:'center' }}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity disabled={changingPwd} onPress={handleChangePassword} style={{ padding:12, borderRadius:8, backgroundColor:'#16a34a', flex:1, marginLeft:8, alignItems:'center' }}>
+              {changingPwd ? <ActivityIndicator color="#fff" /> : <Text style={{ color:'#fff', fontWeight:'700' }}>Update</Text>}
             </TouchableOpacity>
           </View>
         </View>
