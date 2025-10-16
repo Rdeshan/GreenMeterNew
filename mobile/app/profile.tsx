@@ -334,14 +334,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   logoutBtn: {
-    backgroundColor: '#FFC107',
+    backgroundColor: '#da2424ff',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
     marginBottom: 30,
   },
   logoutBtnText: {
-    color: '#2d2d2d',
+    color: '#ffff',
     fontWeight: '700',
     fontSize: 16,
   },

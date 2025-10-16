@@ -11,26 +11,40 @@ const SearchBar: React.FC<SearchBarProps> = ({ search, setSearch }) => {
     <View style={styles.container}>
       <TextInput
         style={styles.searchBar}
-        placeholder="Search devices..."
-        placeholderTextColor="#b3b2b2"
+        placeholder="Search..."
+        placeholderTextColor="#8aa39b"
         value={search}
         onChangeText={setSearch}
+        returnKeyType="search"
+        clearButtonMode="while-editing"
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { alignItems: "center", marginBottom: 12 },
+  container: {
+    alignItems: "center",
+    marginBottom: 12,
+    paddingHorizontal: 8,
+  },
   searchBar: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 40,
     width: 350,
+    maxWidth: 700,
+    height: 44,
+    marginTop:10,
+    borderWidth: 1.5,
+    borderColor: "#2d6a4f",
+    borderRadius: 24,
+    paddingHorizontal: 16,
     fontSize: 16,
-    color: "black",
+    color: "#1f2937",
+    backgroundColor: "#ffffff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
 });
 
